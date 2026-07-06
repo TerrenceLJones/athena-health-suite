@@ -55,7 +55,7 @@ changes:
       title: 'Storybook Accessibility Gate'
   updates:
     - field: reuses_from
-      change: 'Added EPIC-SH-000 (Design Tokens & Icon Registry Foundation) — VitalTile/AlertCard render Observation staleness and severity via that epic''s tokens/icons, formalized by its Severity & Status System doc (US-SH-006).'
+      change: "Added EPIC-SH-000 (Design Tokens & Icon Registry Foundation) — VitalTile/AlertCard render Observation staleness and severity via that epic's tokens/icons, formalized by its Severity & Status System doc (US-SH-006)."
   deprecates: []
   removes: []
 

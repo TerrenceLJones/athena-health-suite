@@ -45,7 +45,7 @@ changes:
       title: 'Role-Based Access Control & Permissions'
   updates:
     - field: reuses_from
-      change: 'Added EPIC-SH-000 (Design Tokens & Icon Registry Foundation) — RBAC-gated actions render severity/status indicators formalized by that epic''s Severity & Status System doc (US-SH-006).'
+      change: "Added EPIC-SH-000 (Design Tokens & Icon Registry Foundation) — RBAC-gated actions render severity/status indicators formalized by that epic's Severity & Status System doc (US-SH-006)."
   deprecates: []
   removes: []
 

@@ -44,7 +44,7 @@ changes:
       title: 'Sync Status Visibility & Push Notifications'
   updates:
     - field: reuses_from
-      change: 'Added EPIC-SH-000 (Design Tokens & Icon Registry Foundation) — the SyncStatusBar and per-record sync badges render data-status indicators formalized by that epic''s Severity & Status System doc (US-SH-006).'
+      change: "Added EPIC-SH-000 (Design Tokens & Icon Registry Foundation) — the SyncStatusBar and per-record sync badges render data-status indicators formalized by that epic's Severity & Status System doc (US-SH-006)."
   deprecates: []
   removes: []
 

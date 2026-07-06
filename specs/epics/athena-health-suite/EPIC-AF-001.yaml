@@ -48,7 +48,7 @@ changes:
       title: 'Clinical Conflict Resolution'
   updates:
     - field: reuses_from
-      change: 'Added EPIC-SH-000 (Design Tokens & Icon Registry Foundation) — the outbox''s PENDING/IN_FLIGHT/SYNCED/CONFLICT/FAILED states render as data-status indicators formalized by that epic''s Severity & Status System doc (US-SH-006).'
+      change: "Added EPIC-SH-000 (Design Tokens & Icon Registry Foundation) — the outbox's PENDING/IN_FLIGHT/SYNCED/CONFLICT/FAILED states render as data-status indicators formalized by that epic's Severity & Status System doc (US-SH-006)."
   deprecates: []
   removes: []
 
