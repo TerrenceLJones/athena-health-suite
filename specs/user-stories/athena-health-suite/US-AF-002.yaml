@@ -1,0 +1,93 @@
+id: US-AF-002
+app: athena-field
+feature_area: 'Offline Visit Documentation'
+title: 'Offline-First Visit Documentation'
+status: DRAFT
+dependencies:
+  - US-AF-001
+created_by_epic: EPIC-AF-001
+created_date: '2026-07-06'
+history: []
+
+user_story:
+  persona: |
+    A field clinician documenting a home visit with no reliable network connectivity
+  capability: |
+    complete full visit documentation — vitals, QuestionnaireResponses, clinical notes — entirely offline, with every record saved to an encrypted local database and automatically synced the moment connectivity returns, without ever losing work to a session expiry or a full outbox
+  business_value: |
+    A field clinician who loses documentation because of a dead zone or an expired session loses trust in the app entirely; treating the local encrypted database as the source of truth and the outbox as a durable, resumable queue means connectivity is never a precondition for doing the clinician's actual job.
+  description: |
+    Covers saving visit documentation to the local encrypted SQLite database (WatermelonDB + SQLCipher, encrypted via the device Keystore or Data Protection class) with a PENDING outbox entry while offline, automatic pull/push sync on reconnection (detected via NetInfo) with each outbox entry transitioning PENDING to IN_FLIGHT to SYNCED/CONFLICT/FAILED and a global sync progress indicator, the fully-synced end state, outbox-full handling that blocks new large captures with clear guidance rather than silently failing, refreshing and re-verifying cached clinical data after an extended (4+ hour) offline period, preserving all local documentation and retrying automatically when a session token expires mid-visit while offline, and the remote-wipe flow that clears all local clinical data and Keychain entries (and audit-logs the wipe) when the server has flagged the device as lost or stolen.
+
+acceptance_criteria:
+  - id: AC-01
+    title: 'Documenting a visit with no network connectivity'
+    description: |
+      Given I have no network connectivity (airplane mode or no signal)
+      When I complete visit documentation — vitals entry, QuestionnaireResponse, clinical notes
+      Then all data is saved to the local encrypted SQLite database (WatermelonDB + SQLCipher)
+      And an outbox entry is created with status "PENDING"
+      And I see "Saved on device — syncing when connected."
+      And the local database is encrypted with SQLCipher using the device Keystore (Android) or Data Protection class (iOS)
+    status: active
+  - id: AC-02
+    title: 'Outbox syncs automatically on reconnection'
+    description: |
+      Given I have PENDING outbox entries from offline documentation
+      When network connectivity is restored (detected via NetInfo)
+      Then the sync engine initiates a pull/push cycle
+      And each outbox entry transitions: PENDING → IN_FLIGHT → SYNCED (or CONFLICT or FAILED)
+      And I see a global sync progress indicator
+    status: active
+  - id: AC-03
+    title: 'Sync completes with all records synced'
+    description: |
+      Given the sync cycle runs and all records sync without conflict
+      When the cycle completes
+      Then the SyncStatusBar shows "All synced"
+      And per-record badges update to show the synced state
+    status: active
+  - id: AC-04
+    title: 'Outbox queue is full'
+    description: |
+      Given I already have the configured maximum number of records pending sync
+      When I attempt to create a new documentation record
+      Then I see "You have {n} visits waiting to sync. Connect soon to avoid storage issues."
+      And large captures (photos) are specifically blocked with guidance to sync first
+    status: active
+  - id: AC-05
+    title: 'Return online after extended offline period (> 4 hours)'
+    description: |
+      Given I was offline for more than 4 hours
+      When connectivity is restored
+      Then the app shows "Updating your data…" while refreshing cached clinical data
+      And any cached clinical values (vitals, meds) older than the safety threshold display a "Verify before relying on" indicator
+      And the indicator clears only after a fresh fetch confirms the data is current
+    status: active
+  - id: AC-06
+    title: 'Session expires mid-visit while offline'
+    description: |
+      Given I am documenting a visit offline
+      And my session token expires
+      When I return online and the sync engine tries to push
+      Then the sync preserves all local documentation
+      And I see "Session timed out. Your work is saved — sign in to continue."
+      And after re-authentication, the sync is retried automatically with the same data intact
+    status: active
+  - id: AC-07
+    title: 'Remote-wipe triggered by server flag'
+    description: |
+      Given the server has set a remote-wipe flag for my device (e.g., device reported lost or stolen)
+      When the app makes its next server contact
+      Then all locally stored clinical data is wiped from the device
+      And all Keychain entries are cleared
+      And I am redirected to the login screen
+      And a FHIR AuditEvent records the wipe event
+    status: active
+
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+technical_notes: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+edge_cases: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+implementation_status: null

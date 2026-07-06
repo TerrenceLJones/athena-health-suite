@@ -1,0 +1,65 @@
+id: US-SH-006
+app: shared
+feature_area: 'design-system'
+title: 'Severity & Status System Doc'
+status: DRAFT
+dependencies:
+  - US-SH-005
+created_by_epic: EPIC-SH-000
+created_date: '2026-07-06'
+history: []
+
+user_story:
+  persona: |
+    Any engineer or designer, on either app, implementing a new clinical severity indicator or data-status badge
+  capability: |
+    a single reference doc enumerating every severity tier and clinical data-status state, the required color + shape + icon + label combination for each, and the grayscale/never-color-alone test a new indicator must pass before it ships
+  business_value: |
+    Athena Health Suite's own foundational commitment — stated on the cover of the Athena UI Foundation reference doc — is that clinical status is never conveyed by color alone; without one citable doc enumerating the required combinations, that commitment has to be re-derived (or silently skipped) by whoever builds the next indicator, which is exactly how a color-only regression reaches a patient-safety-critical surface.
+  description: |
+    Publishes the documented mapping from athena-tokens.json's `severity` section (critical/advisory/info/stale, each with token, color, icon, shape, and treatment) and `dataStatus` section (preliminary/final/live/stale/disconnected/error, each with token, color, icon, and label pattern) to the shape+icon+label pairing required alongside color, plus the grayscale test itself as an explicit checklist item — turning the "never color alone" statement in the Athena UI Foundation doc's cover and §02–§03 into the canonical reference every future epic or story introducing a new status indicator is expected to cite.
+
+acceptance_criteria:
+  - id: AC-01
+    title: 'All four severity tiers are enumerated with their full combination'
+    description: |
+      Given the doc is published
+      When a reader looks up a severity tier (critical, advisory, info, or stale)
+      Then its token, color, icon, shape, and treatment are all listed, matching athena-tokens.json's `severity` section
+    status: active
+  - id: AC-02
+    title: 'All six dataStatus states are enumerated with their full combination'
+    description: |
+      Given the doc is published
+      When a reader looks up a dataStatus state (preliminary, final, live, stale, disconnected, or error)
+      Then its token, color, icon, and label pattern are all listed, matching athena-tokens.json's `dataStatus` section
+    status: active
+  - id: AC-03
+    title: 'The grayscale test is stated as an explicit checklist item'
+    description: |
+      Given a new severity or status indicator is being reviewed
+      When the reviewer applies the doc's grayscale-test checklist item
+      Then the indicator must remain visually distinguishable from every other tier with hue removed (e.g. octagon vs. triangle vs. outlined circle vs. dashed square) before it can ship
+    status: active
+  - id: AC-04
+    title: 'The doc is the cited source for new status indicators'
+    description: |
+      Given a future epic or story introduces a new clinical status or alert indicator
+      When its severity/status combination is defined
+      Then it cites this doc rather than re-deriving the color+shape+icon+label combination independently
+    status: active
+  - id: AC-05
+    title: 'Publishing this doc retroactively updates every existing epic'
+    description: |
+      Given this story ships and EPIC-SH-000 is complete
+      When the existing epics (EPIC-AP-001 through EPIC-AP-004, EPIC-AF-001, EPIC-AF-002, EPIC-SH-001) are revisited
+      Then each adds EPIC-SH-000 to its reuses_from list, since each already renders severity or data-status indicators that this doc formalizes
+      And each records that addition as a changes.updates entry, so the retroactive dependency is itself traceable in the registry rather than a silent edit
+    status: active
+
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+technical_notes: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+edge_cases: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+implementation_status: null

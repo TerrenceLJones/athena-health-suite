@@ -1,0 +1,57 @@
+id: US-AP-011
+app: athena-provider
+feature_area: 'Storybook Accessibility Gate'
+title: 'Storybook Accessibility Gate'
+status: DRAFT
+dependencies:
+  - US-AP-010
+created_by_epic: EPIC-AP-002
+created_date: '2026-07-06'
+history: []
+
+user_story:
+  persona: |
+    A Provider frontend engineer or reviewer verifying that libs/ui components meet WCAG 2.1 AA before they reach the chart
+  capability: |
+    run an automated axe-core accessibility scan against every Storybook story for VitalTile and AlertCard (and future libs/ui primitives) as a CI-blocking gate, so a contrast, ARIA, or focus-order regression in a shared component is caught at the component's origin rather than after it's composed into a full chart page
+  business_value: |
+    EPIC-SH-001 (US-SH-002) already commits both apps to WCAG 2.1 AA with CI-blocking axe scans at the app level; gating libs/ui's own component stories in Storybook catches a primitive-level defect — e.g. insufficient contrast on VitalTile's stale dimming, a missing aria-label on an AlertCard action button — before it's composed into a page, where it becomes harder to isolate and more expensive to fix.
+  description: |
+    Covers a Storybook instance for libs/ui with one story per VitalTile state (live/stale/disconnected/entered-in-error) and one per AlertCard severity tier (critical/advisory/info), sourced from US-AP-010; an addon-a11y (axe-core) panel for interactive feedback during development; and a CI job that runs the same axe rules headlessly against every story and fails the build on any violation — extending, not duplicating, the app-level accessibility work already scoped to US-SH-002.
+
+acceptance_criteria:
+  - id: AC-01
+    title: 'A Storybook story exists for every VitalTile and AlertCard state'
+    description: |
+      Given libs/ui's Storybook instance
+      When it is built
+      Then one story exists per VitalTile data-status state and per AlertCard severity tier, sourced from US-AP-010
+    status: active
+  - id: AC-02
+    title: 'Every story runs an axe-core accessibility check'
+    description: |
+      Given any VitalTile or AlertCard story
+      When it is viewed in Storybook or run in CI
+      Then an axe-core check runs against it for contrast, ARIA roles/labels, and focus order, both interactively via the addon-a11y panel and headlessly in CI
+    status: active
+  - id: AC-03
+    title: 'CI blocks the build on any axe violation'
+    description: |
+      Given a Storybook story has an axe-core violation
+      When the CI accessibility job runs
+      Then the build fails — the gate is blocking, not advisory
+    status: active
+  - id: AC-04
+    title: 'The gate is component-scoped, not a duplicate of the app-level scan'
+    description: |
+      Given both this gate and US-SH-002's app-level WCAG 2.1 AA scan exist
+      When either runs
+      Then this gate covers libs/ui component stories specifically, complementing rather than duplicating the app-level scan's coverage of full Provider and Field screens
+    status: active
+
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+technical_notes: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+edge_cases: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+implementation_status: null

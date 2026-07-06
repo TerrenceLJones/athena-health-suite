@@ -1,0 +1,81 @@
+id: US-AP-003
+app: athena-provider
+feature_area: 'Role-Based Access Control & Permissions'
+title: 'Role-Based Access Control & Permissions'
+status: DRAFT
+dependencies:
+  - US-AP-001
+created_by_epic: EPIC-AP-001
+created_date: '2026-07-06'
+history: []
+
+user_story:
+  persona: |
+    A physician, nurse, care coordinator, or admin using Athena Provider under their assigned role
+  capability: |
+    see and act only on the chart panels and actions my clinical role permits, with every gate enforced on the server independently of what the UI happens to render
+  business_value: |
+    Prevents unauthorized clinical actions (e.g., a nurse signing a note, a care coordinator editing medications, an admin viewing a clinical chart) and satisfies the HIPAA minimum-necessary-access principle, while server-side enforcement closes the gap that UI-only gating would leave open to direct URL or API access.
+  description: |
+    Covers role-scoped chart rendering for physician (full chart + Sign note), nurse (chart without Sign note, absent not disabled), care coordinator (read-only, no medication edit controls), and admin (billing only, no clinical chart access), plus the two enforcement invariants that make UI gating meaningless on its own: direct URL access to an unauthorized action is independently rejected by the server with 403, and a mid-session permission revocation degrades the affected panels gracefully on the next request rather than trusting stale client-side state.
+
+acceptance_criteria:
+  - id: AC-01
+    title: 'Physician sees the full chart including the Sign button'
+    description: |
+      Given I am logged in as a physician
+      When I view a patient chart
+      Then I see all chart panels: vitals, medications, notes, orders
+      And the "Sign note" button is visible and enabled
+    status: active
+  - id: AC-02
+    title: 'Nurse sees the chart but cannot sign notes'
+    description: |
+      Given I am logged in as a nurse
+      When I view a patient chart
+      Then I see vitals, medications, and notes panels
+      And the "Sign note" button is not rendered — it is never shown as disabled, just absent
+    status: active
+  - id: AC-03
+    title: 'Care coordinator sees the chart but cannot edit medications'
+    description: |
+      Given I am logged in as a care coordinator
+      When I view a patient chart
+      Then I see the chart in read-only mode
+      And no medication edit controls are rendered
+    status: active
+  - id: AC-04
+    title: 'Admin can access billing but not clinical charts'
+    description: |
+      Given I am logged in as an admin
+      When I navigate to the billing panel
+      Then I see billing data
+      And when I attempt to navigate to a patient chart directly
+      Then I see "You don't have access to this." and am redirected
+    status: active
+  - id: AC-05
+    title: 'Direct URL access to an unauthorized resource'
+    description: |
+      Given I am logged in as a care coordinator
+      When I navigate directly to a URL that would render the "Sign note" interface
+      Then the server independently rejects the action with 403
+      And I see "You don't have access to this information."
+      And no clinical action is taken — UI-level gating is never the only enforcement
+    status: active
+  - id: AC-06
+    title: 'Role changes mid-session'
+    description: |
+      Given I am logged in as a nurse
+      And an admin revokes my medication-edit permission while I am active
+      When I make my next FHIR request
+      Then a 403 is returned for the action
+      And I see a banner "Your access changed. Some features may no longer be available."
+      And the affected panels degrade gracefully — they do not crash the page
+    status: active
+
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+technical_notes: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+edge_cases: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+implementation_status: null

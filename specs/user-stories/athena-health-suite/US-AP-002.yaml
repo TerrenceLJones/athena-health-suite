@@ -1,0 +1,103 @@
+id: US-AP-002
+app: athena-provider
+feature_area: 'SMART on FHIR Launch'
+title: 'SMART on FHIR Launch'
+status: DRAFT
+dependencies: []
+created_by_epic: EPIC-AP-001
+created_date: '2026-07-06'
+history: []
+
+user_story:
+  persona: |
+    A clinician launching Athena Provider from within their EHR, or opening it standalone
+  capability: |
+    have the app resolve patient and encounter context automatically via SMART on FHIR when launched from the EHR, or pick a patient explicitly when launched standalone — with the authorization flow hardened against CSRF and never opening a chart in an undefined or wrong-patient context
+  business_value: |
+    Eliminates manual patient lookup for EHR-launched sessions (the majority of real clinical usage), while the PKCE + state-parameter hardening and the hard block on missing patient context prevent the single worst failure mode in an EHR-embedded app — operating on the wrong patient.
+  description: |
+    Covers the full SMART on FHIR authorization_code + PKCE flow: discovery via the well-known smart-configuration endpoint, EHR launch with automatic patient/encounter context resolution, standalone launch with an explicit patient-picker, and the full set of unhappy paths — missing launch parameters, state-parameter mismatch (CSRF signal), missing patient context in the token response (hard-blocked as Patient-Safety-Critical), insufficient FHIR scope for a specific resource (scoped to the affected panel only), unreachable discovery endpoint, and failed code exchange. Establishes how every Provider session acquires its clinical context.
+
+acceptance_criteria:
+  - id: AC-01
+    title: 'Successful EHR launch with patient context'
+    description: |
+      Given the EHR calls my registered launch URL with valid "iss" and "launch" parameters
+      When the launch flow executes
+      Then I fetch "{iss}/.well-known/smart-configuration" to discover endpoints
+      And I redirect to the authorization_endpoint with PKCE (S256 code_challenge), a state parameter with at least 128 bits of entropy, and the "launch" scope
+      And after the clinician authenticates, the authorization server redirects to my redirect_uri with a code and the original state
+      And I exchange the code at the token_endpoint using the PKCE code_verifier
+      And I receive patient and encounter context in the token response
+      And I open the patient chart without prompting for a patient picker
+      And a FHIR AuditEvent records the chart access with practitioner ID and patient ID
+    status: active
+  - id: AC-02
+    title: 'Standalone launch — clinician picks a patient'
+    description: |
+      Given the app is launched without EHR context (standalone mode)
+      When the authorization flow completes
+      Then I am shown a patient search/selection screen
+      And after selecting a patient, the chart opens with that patient in context
+    status: active
+  - id: AC-03
+    title: 'Launch URL called without "iss" or "launch" parameters'
+    description: |
+      Given the launch URL is accessed without the required parameters
+      When this is detected
+      Then I see a clear error: "This app must be launched from your EHR. Please use the EHR's app launcher."
+      And no attempt is made to open a chart in an undefined context
+    status: active
+  - id: AC-04
+    title: 'State parameter mismatch (CSRF signal)'
+    description: |
+      Given the authorization server returns a state value
+      When the returned state does not match any stored PKCE session
+      Then the flow is aborted immediately
+      And I see "Sign-in couldn't be verified — please try again."
+      And the mismatch is logged as a security event (without the mismatched state value itself, which may be attacker-controlled)
+      And the app never proceeds with the mismatched token
+    status: active
+  - id: AC-05
+    title: 'Launch with missing patient context'
+    description: |
+      Given the EHR launch completes
+      But the token response contains no patient ID or encounter ID
+      When the chart would open
+      Then the clinical view is hard-blocked
+      And I see "No patient context — relaunch from the EHR."
+      And no chart loads, no patient data is fetched, and no guess is made about which patient to show
+      And this is treated as a Patient-Safety-Critical error — operating on the wrong patient is a never-event
+    status: active
+  - id: AC-06
+    title: 'Insufficient scope for a specific FHIR resource'
+    description: |
+      Given I authenticated with a scope that does not include MedicationRequest read access
+      When the medications panel attempts to load
+      Then only the medications panel shows "You don't have access to this information."
+      And all other chart panels with appropriate scope continue to render normally
+      And the error is scoped to the specific panel — it does not crash the entire chart
+    status: active
+  - id: AC-07
+    title: 'SMART discovery endpoint unreachable'
+    description: |
+      Given the EHR's ".well-known/smart-configuration" endpoint is unreachable
+      When the launch flow attempts discovery
+      Then I see "We couldn't connect to your EHR. Please try relaunching."
+      And no fallback hardcoded endpoint is used — discovery is always live
+    status: active
+  - id: AC-08
+    title: 'Authorization code exchange fails'
+    description: |
+      Given the token_endpoint returns an error on code exchange
+      When the exchange fails
+      Then I see "Sign-in failed. Please close this window and relaunch from the EHR."
+      And no partial token is stored or used
+    status: active
+
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+technical_notes: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+edge_cases: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+implementation_status: null

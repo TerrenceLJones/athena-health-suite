@@ -1,0 +1,46 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+storybook-static/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.history/
+
+# Misc
+*.tsbuildinfo
+.cache/
+
+# Monorepo (Nx + pnpm)
+.nx/cache
+.nx/workspace-data
+.nx/migrate-runs
+coverage/
+.pnpm-store/
+
+# Playwright
+playwright-report/
+test-results/
+blob-report/

@@ -1,0 +1,63 @@
+epic_id: EPIC-AP-001
+title: 'Provider Identity & Access'
+app: athena-provider
+feature_area: 'Identity & Access'
+status: DRAFT
+approved_date: null
+created_date: '2026-07-06'
+
+source_reference:
+  - 'docs/reference/athena-health-suite-plan.md §6 App 1 — Athena Provider (Web Clinician Console)'
+  - 'docs/reference/athena-health-suite-plan.md §8 User Stories & Acceptance Criteria — Story 5 (SMART on FHIR EHR launch)'
+  - 'docs/reference/athena-health-suite-plan.md §11 HIPAA Compliance Patterns (auto-logoff, RBAC)'
+  - 'docs/reference/athena-user-stories-gherkin.md §1 Authentication & Session Management'
+  - 'docs/reference/athena-user-stories-gherkin.md §2 SMART on FHIR Launch (Athena Provider)'
+  - 'docs/reference/athena-user-stories-gherkin.md §3 Role-Based Access Control & Permissions'
+
+package_location:
+  - apps/athena-provider/
+  - libs/auth/
+  - libs/compliance/
+
+deployment_unit: 'apps/athena-provider (Vercel)'
+
+adr_reference: []
+
+depends_on_epics: []
+
+extends_stories: []
+
+reuses_from: []
+
+has_ui: true
+
+changes:
+  adds:
+    - story_id: US-AP-001
+      story_path: specs/user-stories/athena-health-suite/US-AP-001.yaml
+      title: 'Authentication & Session Management'
+    - story_id: US-AP-002
+      story_path: specs/user-stories/athena-health-suite/US-AP-002.yaml
+      title: 'SMART on FHIR Launch'
+    - story_id: US-AP-003
+      story_path: specs/user-stories/athena-health-suite/US-AP-003.yaml
+      title: 'Role-Based Access Control & Permissions'
+  updates: []
+  deprecates: []
+  removes: []
+
+notes: |
+  Groups the identity and access-control foundation that every other Athena Provider
+  feature is built on top of: standard login and session lifecycle (auto-logoff, token
+  refresh, password reset, silent single-session enforcement), SMART on FHIR launch
+  context resolution (EHR launch and standalone), and role-based chart/action gating
+  enforced both client- and server-side.
+
+  No numbered ADR in the plan covers identity/session/RBAC specifically — ADR-001
+  through ADR-005 address FHIR typing, offline sync, conflict resolution, PHI storage,
+  and alert fatigue, none of which is the architectural decision this epic turns on.
+
+  Every subsequent Provider epic (chart core, CDS/AI, prior auth) assumes an
+  authenticated session with a resolved patient/encounter context and a known clinical
+  role, so this epic has no upstream dependencies within Athena Health Suite and is the
+  natural starting point for Provider implementation.

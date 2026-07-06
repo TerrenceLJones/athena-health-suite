@@ -1,0 +1,66 @@
+id: US-AP-010
+app: athena-provider
+feature_area: 'UI Primitives'
+title: 'UI Primitives: VitalTile & AlertCard'
+status: DRAFT
+dependencies:
+  - US-SH-004
+  - US-SH-005
+  - US-SH-006
+created_by_epic: EPIC-AP-002
+created_date: '2026-07-06'
+history: []
+
+user_story:
+  persona: |
+    A Provider frontend engineer implementing chart panels — vitals tiles, CDS alert cards — inside libs/ui
+  capability: |
+    consume two rendered UI primitives, VitalTile (live/stale/disconnected/entered-in-error states) and AlertCard (critical/advisory/info severity tiers), built exclusively from the libs/design-tokens/ and libs/icons/ packages rather than component-local hardcoded colors or inline SVGs, so every vitals tile and CDS card in the Provider chart renders from the same token-and-icon source
+  business_value: |
+    Building VitalTile and AlertCard directly against the shared token and icon registries — instead of re-deriving colors and glyphs ad hoc per component — guarantees the rendered chart matches the approved design system pixel-for-pixel, re-themes for free the moment a token changes, and can't silently reintroduce a color-only severity signal.
+  description: |
+    Covers the VitalTile component's four data-status states (live with a pulsing badge and current value; stale with a dimmed value and a "Last updated {time}" label; disconnected with "No current data available" and a reconnect action; entered-in-error struck through with the error tint) and the AlertCard component's three severity tiers (critical — solid octagon, focus-trapped-modal styling; advisory — solid triangle, inline; info — outlined circle, non-blocking) — both consuming libs/design-tokens/ tokens and libs/icons/ `<ath-icon>` glyphs exclusively, with no component-local hex values or inline SVG paths.
+
+acceptance_criteria:
+  - id: AC-01
+    title: 'VitalTile renders all four data-status states'
+    description: |
+      Given a VitalTile is rendered with a live, stale, disconnected, or entered-in-error Observation
+      When the component mounts
+      Then it renders the state-appropriate badge, value treatment, and action, sourcing every color and icon from libs/design-tokens/ and libs/icons/ only
+    status: active
+  - id: AC-02
+    title: 'AlertCard renders all three severity tiers'
+    description: |
+      Given an AlertCard is rendered with a critical, advisory, or info severity
+      When the component mounts
+      Then it renders the tier-appropriate color, shape, icon, and label combination defined in the severity/status system doc (US-SH-006)
+    status: active
+  - id: AC-03
+    title: 'Neither component hardcodes a color or icon path'
+    description: |
+      Given the VitalTile or AlertCard source is reviewed
+      When searching for hex colors or inline SVG path data
+      Then none are found — every color and icon reference resolves through libs/design-tokens/ or libs/icons/
+    status: active
+  - id: AC-04
+    title: 'Both components re-theme via tokens alone'
+    description: |
+      Given the app theme switches between light and dark
+      When VitalTile or AlertCard re-renders
+      Then it re-themes correctly using the CSS custom properties from libs/design-tokens/, with no component-level theme branching
+    status: active
+  - id: AC-05
+    title: "VitalTile's degraded states and AlertCard's critical tier pass the grayscale test"
+    description: |
+      Given VitalTile's stale/disconnected states and AlertCard's critical tier
+      When rendered with hue removed
+      Then each remains distinguishable from the others by shape and icon alone, per the grayscale test defined in US-SH-006
+    status: active
+
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+technical_notes: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+edge_cases: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+implementation_status: null

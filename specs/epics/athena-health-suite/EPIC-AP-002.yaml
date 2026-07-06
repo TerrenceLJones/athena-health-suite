@@ -1,0 +1,78 @@
+epic_id: EPIC-AP-002
+title: 'Provider Clinical Chart Core'
+app: athena-provider
+feature_area: 'Clinical Chart Core'
+status: DRAFT
+approved_date: null
+created_date: '2026-07-06'
+
+source_reference:
+  - 'docs/reference/athena-health-suite-plan.md §6 App 1 — Athena Provider (Web Clinician Console) — Core features 1–2 (Patient chart, Real-time vitals dashboard)'
+  - 'docs/reference/athena-health-suite-plan.md §8 User Stories & Acceptance Criteria — Story 1 (Real-time vitals review)'
+  - 'docs/reference/athena-health-suite-plan.md §9 Error States, Unhappy Paths & Clinical Error Architecture'
+  - 'docs/reference/athena-health-suite-plan.md §10 Core Technical Patterns — FHIR types, FHIR search patterns, Observation status lifecycle in the UI'
+  - 'docs/reference/athena-user-stories-gherkin.md §4 Real-Time Vitals Dashboard (Athena Provider)'
+  - 'docs/reference/athena-user-stories-gherkin.md §5 FHIR Patient Chart Rendering (Athena Provider)'
+  - 'docs/reference/athena-user-stories-gherkin.md §9 Encounter Lifecycle (Athena Provider)'
+
+package_location:
+  - apps/athena-provider/
+  - libs/fhir/*
+  - libs/clinical/state-machines/
+  - libs/clinical/safety/
+  - libs/ui/
+
+deployment_unit: 'apps/athena-provider (Vercel)'
+
+adr_reference: []
+
+depends_on_epics:
+  - EPIC-AP-001
+
+extends_stories: []
+
+reuses_from: []
+
+has_ui: true
+
+changes:
+  adds:
+    - story_id: US-AP-004
+      story_path: specs/user-stories/athena-health-suite/US-AP-004.yaml
+      title: 'Real-Time Vitals Dashboard'
+    - story_id: US-AP-005
+      story_path: specs/user-stories/athena-health-suite/US-AP-005.yaml
+      title: 'FHIR Patient Chart Rendering'
+    - story_id: US-AP-009
+      story_path: specs/user-stories/athena-health-suite/US-AP-009.yaml
+      title: 'Encounter Lifecycle State Machine'
+    - story_id: US-AP-010
+      story_path: specs/user-stories/athena-health-suite/US-AP-010.yaml
+      title: 'UI Primitives: VitalTile & AlertCard'
+    - story_id: US-AP-011
+      story_path: specs/user-stories/athena-health-suite/US-AP-011.yaml
+      title: 'Storybook Accessibility Gate'
+  updates: []
+  deprecates: []
+  removes: []
+
+notes: |
+  Groups the core clinical-record surfaces of Athena Provider: real-time vitals with
+  staleness safety (the 5s/30s/2min never-show-stale-as-current invariants), FHIR
+  resource-correctness chart rendering (Observation/MedicationRequest status handling,
+  scoped error boundaries for 404/401/403/422/429/500/timeout), and the XState
+  encounter lifecycle (planned → arrived → in-progress → finished/cancelled) that
+  gates when the chart and its sub-panels become editable. These three stories share
+  one dependency shape — they all read and render live FHIR resources inside the
+  chart shell — so they're kept together rather than split further.
+
+  Depends on EPIC-AP-001 because every chart view requires a resolved SMART session,
+  patient/encounter context, and a known clinical role before it can render anything.
+  No numbered ADR governs this epic directly: ADR-001 (@medplum/fhirtypes) is a
+  tooling choice that underlies it but isn't a decision scoped to this epic specifically.
+
+  This is the one Provider epic that imports libs/ui directly, since the chart shell,
+  VitalTile, and status badges are rendered UI. Phase 3 is expected to extend this
+  epic with two more stories once they're built — the VitalTile and AlertCard UI
+  primitives themselves — because libs/ui is a Provider-only rendering surface and
+  this is the epic that owns it.

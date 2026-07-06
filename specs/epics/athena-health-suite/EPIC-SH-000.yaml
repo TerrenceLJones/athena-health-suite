@@ -1,0 +1,77 @@
+epic_id: EPIC-SH-000
+title: 'Design Tokens & Icon Registry Foundation'
+app: shared
+feature_area: 'design-system'
+status: DRAFT
+approved_date: null
+created_date: '2026-07-06'
+
+source_reference:
+  - 'athena-tokens.json, athena-icons.js — committed to specs/designs/athena-health-suite/ in phase 1'
+
+package_location:
+  - libs/design-tokens/
+  - libs/icons/
+
+deployment_unit: "libs/design-tokens/, libs/icons/ (consumed by both apps' own deployments)"
+
+adr_reference: []
+
+depends_on_epics: []
+
+extends_stories: []
+
+reuses_from: []
+
+has_ui: false
+
+changes:
+  adds:
+    - story_id: US-SH-004
+      story_path: specs/user-stories/athena-health-suite/US-SH-004.yaml
+      title: 'Token Pipeline'
+    - story_id: US-SH-005
+      story_path: specs/user-stories/athena-health-suite/US-SH-005.yaml
+      title: 'Icon Registry Component'
+    - story_id: US-SH-006
+      story_path: specs/user-stories/athena-health-suite/US-SH-006.yaml
+      title: 'Severity & Status System Doc'
+  updates: []
+  deprecates: []
+  removes: []
+
+notes: |
+  Unlike every other epic in this registry, this one derives from the committed
+  design-source files — athena-tokens.json, athena-icons.js, and the "Athena UI
+  Foundation" reference doc in specs/designs/athena-health-suite/ — rather than from
+  docs/reference/athena-user-stories-gherkin.md. There is no Gherkin scenario backing
+  US-SH-004–006 because the design system was never described as clinician-facing
+  behavior; it's the substrate the Gherkin-backed epics render against. Their
+  acceptance criteria are synthesized directly from the token manifest's own
+  structure (primitive/severity/dataStatus/theme/typography/spacing tiers) and the
+  icon registry's own module (the ICONS map, the ALIAS table, the <ath-icon> web
+  component) rather than from a BDD scenario.
+
+  has_ui is false and package_location is deliberately scoped to libs/design-tokens/
+  and libs/icons/ only — this epic ships typed token data, compiled CSS custom
+  properties, an icon-name registry, and a severity/status reference doc, not a
+  rendered component. The rendered UI primitives that consume this data — VitalTile
+  and AlertCard, plus their Storybook accessibility gate — extend EPIC-AP-002
+  instead (added by this same commit as US-AP-010 and US-AP-011), because libs/ui is
+  a Provider-only rendering surface that epic already owns; nothing in Athena Field
+  renders these primitives directly.
+
+  No numbered ADR governs this epic: the plan's §5 Shared Design System (@athena/ui)
+  section is the closest precedent, but it documents an existing design-system
+  commitment rather than a decision with alternatives considered, so adr_reference is
+  left empty rather than pointing at a section that isn't actually an ADR.
+
+  Both apps depend on this epic's output — Athena Provider for its chart surfaces,
+  Athena Field for its own status/severity indicators — but neither app-specific
+  epic lists EPIC-SH-000 in depends_on_epics or reuses_from yet, since none of those
+  epics existed, or were even planned, when this one was cut from phase-1 source
+  rather than the phase-2 Gherkin doc. US-SH-006, this epic's last story, is expected
+  to close that gap once it ships: retroactively adding EPIC-SH-000 to every existing
+  epic's reuses_from and recording the addition as a changes.updates entry on each —
+  the same living-document pattern EPIC-AP-002 used when it named US-AP-010/011 as
+  stories it expected to gain before either existed.

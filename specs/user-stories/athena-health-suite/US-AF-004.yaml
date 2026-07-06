@@ -1,0 +1,99 @@
+id: US-AF-004
+app: athena-field
+feature_area: 'QuestionnaireResponse Forms'
+title: 'FHIR QuestionnaireResponse Clinical Forms'
+status: DRAFT
+dependencies:
+  - US-AF-002
+created_by_epic: EPIC-AF-002
+created_date: '2026-07-06'
+history: []
+
+user_story:
+  persona: |
+    A field clinician filling out a structured clinical assessment form during a home visit
+  capability: |
+    complete a form rendered directly from a server-pushed FHIR Questionnaire — including conditional (enableWhen) items that show and hide correctly, fail safe if the conditional logic itself is broken, and validate in plain language — fully offline, with the result stored as a FHIR-R4-valid QuestionnaireResponse and safely queued if sync fails
+  business_value: |
+    Rendering forms directly from the FHIR Questionnaire resource (rather than hand-coded forms per assessment type) lets new clinical forms ship without an app release, while fail-safe enableWhen handling and plain-language validation keep a broken conditional-logic rule or a raw FHIR error from ever blocking a clinician from completing a required assessment in the field.
+  description: |
+    Covers rendering all Questionnaire items in specified order with required-field indicators and full offline usability, enableWhen conditional show/hide (including clearing a hidden item's value so it's excluded from the response) and the fail-safe default of showing an item when its enableWhen reference is broken, blocking submission on an empty required field with plain-language inline errors and focus management, rejecting an invalid ValueSet code with the allowed options listed, saving the QuestionnaireResponse locally as FHIR-R4-valid and PENDING when offline, and the FAILED-on-sync path (including 422/OperationOutcome parsing into plain-language guidance) that always preserves the response in the local database rather than losing it.
+
+acceptance_criteria:
+  - id: AC-01
+    title: 'Form renders from a FHIR Questionnaire resource'
+    description: |
+      Given a Questionnaire resource has been pushed to the device
+      When I open the form
+      Then all items render in the order specified by the Questionnaire
+      And required fields are marked with a visible required indicator
+      And the form is fully usable offline
+    status: active
+  - id: AC-02
+    title: '"enableWhen" conditional logic shows and hides items correctly'
+    description: |
+      Given a Questionnaire has an item that should only appear when a prior item has a specific value
+      When I enter the triggering value in the prior item
+      Then the conditional item appears immediately
+      And when I clear or change the prior value, the conditional item is hidden
+      And the hidden item's value is cleared so it is not included in the QuestionnaireResponse
+    status: active
+  - id: AC-03
+    title: '"enableWhen" conditional logic fails due to a missing reference'
+    description: |
+      Given a Questionnaire has an enableWhen condition referencing a question ID that does not exist
+      When the form renders
+      Then the affected item is shown by default (fail-safe — a hidden question due to a logic error is worse than a visible one)
+      And the logic error is logged for engineering review without showing a technical error to the clinician
+    status: active
+  - id: AC-04
+    title: 'Clinician submits form with a required field empty'
+    description: |
+      Given I attempt to submit a QuestionnaireResponse with a required field left blank
+      When I tap "Submit"
+      Then submission is blocked
+      And an inline field-level error is shown in plain language: "Please enter the patient's pain level." (not a FHIR error code)
+      And focus moves to the first invalid field
+    status: active
+  - id: AC-05
+    title: 'Invalid code system value entered'
+    description: |
+      Given a form item requires a code from a specific ValueSet
+      When I enter a code that does not exist in that ValueSet
+      Then the field shows "Please select a valid option" with the allowed options listed
+      And the invalid code is never saved to the QuestionnaireResponse
+    status: active
+  - id: AC-06
+    title: 'Form saved offline and queued for sync'
+    description: |
+      Given I complete a QuestionnaireResponse while offline
+      When I submit the form
+      Then the QuestionnaireResponse is saved to the local WatermelonDB with status PENDING
+      And I see "Saved — will sync when connected."
+      And the QuestionnaireResponse is FHIR R4 valid at the point of local storage (validated client-side)
+    status: active
+  - id: AC-07
+    title: 'Sync of QuestionnaireResponse fails on reconnection'
+    description: |
+      Given a QuestionnaireResponse is in the PENDING outbox
+      When the sync push fails (e.g., FHIR validation failure on the server)
+      Then the QuestionnaireResponse status updates to FAILED in the outbox
+      And I see a per-record error: "Failed to sync — tap to retry."
+      And the data is never lost — it remains in the local database
+    status: active
+  - id: AC-08
+    title: 'FHIR validation failure on QuestionnaireResponse sync'
+    description: |
+      Given the server rejects a QuestionnaireResponse with a 422 OperationOutcome
+      When this is returned
+      Then the specific OperationOutcome.issue[] entries are parsed
+      And the clinician sees plain-language guidance on what to fix
+      And the QuestionnaireResponse remains in the local database for correction
+    status: active
+
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+technical_notes: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+edge_cases: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+implementation_status: null

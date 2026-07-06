@@ -1,0 +1,68 @@
+epic_id: EPIC-AF-001
+title: 'Field Identity & Offline Core'
+app: athena-field
+feature_area: 'Identity & Offline Core'
+status: DRAFT
+approved_date: null
+created_date: '2026-07-06'
+
+source_reference:
+  - 'docs/reference/athena-health-suite-plan.md §7 App 2 — Athena Field (React Native Offline Field App) — Core features 1, 3 (Offline-first visit documentation, Biometric auth)'
+  - 'docs/reference/athena-health-suite-plan.md §8 User Stories & Acceptance Criteria — Story 4 (Offline visit documentation, Athena Field)'
+  - 'docs/reference/athena-health-suite-plan.md §10 Core Technical Patterns — WatermelonDB offline sync with clinical conflict resolution'
+  - 'docs/reference/athena-health-suite-plan.md §16 Architecture Decision Records — ADR-002 (Offline sync engine), ADR-003 (Clinical conflict resolution)'
+  - 'docs/reference/athena-user-stories-gherkin.md §10 Biometric Authentication (Athena Field)'
+  - 'docs/reference/athena-user-stories-gherkin.md §11 Offline Visit Documentation (Athena Field)'
+  - 'docs/reference/athena-user-stories-gherkin.md §12 Clinical Conflict Resolution (Athena Field)'
+
+package_location:
+  - apps/athena-field/
+  - libs/auth/
+  - libs/offline/
+
+deployment_unit: 'apps/athena-field (EAS)'
+
+adr_reference:
+  - ADR-002
+  - ADR-003
+
+depends_on_epics: []
+
+extends_stories: []
+
+reuses_from: []
+
+has_ui: true
+
+changes:
+  adds:
+    - story_id: US-AF-001
+      story_path: specs/user-stories/athena-health-suite/US-AF-001.yaml
+      title: 'Biometric Authentication'
+    - story_id: US-AF-002
+      story_path: specs/user-stories/athena-health-suite/US-AF-002.yaml
+      title: 'Offline-First Visit Documentation'
+    - story_id: US-AF-003
+      story_path: specs/user-stories/athena-health-suite/US-AF-003.yaml
+      title: 'Clinical Conflict Resolution'
+  updates: []
+  deprecates: []
+  removes: []
+
+notes: |
+  Groups the foundation every other Athena Field feature is built on: device-level
+  identity (biometric unlock gating Keychain-held tokens, the two-service Keychain
+  architecture, step-up re-auth for sensitive actions) and the offline-first
+  storage/sync core (WatermelonDB + SQLCipher as the local source of truth, the
+  PENDING → IN_FLIGHT → SYNCED/CONFLICT/FAILED outbox lifecycle, and human-mediated
+  clinical conflict resolution — never last-write-wins).
+
+  ADR-002 (WatermelonDB offline sync engine) and ADR-003 (human-mediated clinical
+  conflict resolution) both apply directly to this epic — they are the two
+  architectural decisions this epic's offline core is built around. No ADR governs
+  the biometric-auth half specifically.
+
+  This is the Athena Field analogue of EPIC-AP-001: it has no upstream dependencies
+  within Athena Health Suite, and every other Field epic (forms/capture/sync) assumes
+  the device is unlocked and the local database + sync/conflict machinery already
+  exist.

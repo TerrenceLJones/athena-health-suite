@@ -1,0 +1,91 @@
+id: US-AF-001
+app: athena-field
+feature_area: 'Biometric Authentication'
+title: 'Biometric Authentication'
+status: DRAFT
+dependencies: []
+created_by_epic: EPIC-AF-001
+created_date: '2026-07-06'
+history: []
+
+user_story:
+  persona: |
+    A field clinician unlocking Athena Field on a personal or agency-issued mobile device
+  capability: |
+    unlock the app with Face ID / Touch ID, with the device's biometric-gated Keychain releasing the access token only on a successful match, graceful fallback to password login whenever biometrics are unavailable or fail, and full re-authentication forced the moment the device's enrolled biometric set changes
+  business_value: |
+    Biometric unlock lets a field clinician access patient data quickly between visits without typing credentials on a phone in the field, while the two-service Keychain architecture and the biometric-roster-change invalidation close the specific attack where a stolen, unlocked device could have its biometric enrollment changed to add an attacker's fingerprint.
+  description: |
+    Covers successful Face ID/Touch ID unlock retrieving the access token from the biometric-gated Keychain service (accessControl BIOMETRY_CURRENT_SET, accessible WHEN_UNLOCKED_THIS_DEVICE_ONLY), failed-match retry with fallback to passcode after 3 attempts, graceful degradation when no biometric hardware is enrolled or available, neutral handling of a user-cancelled prompt, forced full re-authentication when the device's enrolled biometric roster changes since last login (treated as a security event, never bypassed), the two-Keychain-namespace architecture where routine API calls read from an "unlocked" namespace that never triggers a biometric prompt while the biometric-gated namespace is reserved for explicit re-auth, and step-up biometric re-verification for high-sensitivity actions that fails closed on just that action rather than locking the whole app.
+
+acceptance_criteria:
+  - id: AC-01
+    title: 'Successful Face ID / Touch ID unlock'
+    description: |
+      Given I have enrolled biometrics on my device
+      And I previously enabled biometric login in Athena Field
+      When I open the app
+      Then the OS biometric prompt is triggered
+      And upon a successful match, the access token is retrieved from the biometric-gated Keychain service (using accessControl: BIOMETRY_CURRENT_SET and accessible: WHEN_UNLOCKED_THIS_DEVICE_ONLY)
+      And I am taken to my patient/visit list without re-entering credentials
+    status: active
+  - id: AC-02
+    title: 'Biometric match fails — retry available'
+    description: |
+      Given the biometric prompt is displayed
+      When the scan does not match the enrolled biometric
+      Then I am given the option to retry
+      And after 3 failed attempts, I see "Too many attempts. Use your passcode to continue."
+      And the app falls back to password/passcode authentication
+    status: active
+  - id: AC-03
+    title: 'Biometric hardware unavailable'
+    description: |
+      Given my device has no biometric sensor or biometrics are disabled at the OS level
+      When I open the app
+      Then I see "Biometrics aren't set up on this device. Sign in with your password."
+      And I am never blocked from accessing the app via standard login
+    status: active
+  - id: AC-04
+    title: 'User cancels the biometric prompt'
+    description: |
+      Given the biometric prompt is displayed
+      When I tap "Cancel" or dismiss the prompt
+      Then the app presents the manual sign-in screen
+      And no error is shown — this is a neutral user choice
+    status: active
+  - id: AC-05
+    title: 'Enrolled biometrics changed since last session (security event)'
+    description: |
+      Given the device's enrolled biometric set (Face ID or fingerprint roster) has changed since I last logged in
+      When I open the app
+      Then the previously stored access token and keychain entry are immediately invalidated
+      And I see "Your device's biometrics changed. Please sign in again to re-enable Face ID."
+      And full re-authentication is required before biometric login can be re-enabled
+      And this check is never bypassed — a changed biometric roster is a potential security event
+    status: active
+  - id: AC-06
+    title: 'Two-service Keychain architecture is enforced'
+    description: |
+      Given the app uses two distinct Keychain namespaces
+      When the app makes a routine authenticated API call
+      Then the access token is read from the "unlocked" Keychain namespace, which does not trigger a biometric prompt
+      And the biometric-gated namespace is accessed only during explicit re-authentication actions (app unlock or step-up)
+      And tokens are stored with accessible: WHEN_UNLOCKED_THIS_DEVICE_ONLY — they are never accessible when the device is locked
+    status: active
+  - id: AC-07
+    title: 'Step-up biometric for a high-sensitivity action'
+    description: |
+      Given I am documenting a visit and attempt an action requiring step-up (e.g., submitting a controlled-substance-adjacent form)
+      When the step-up gate triggers
+      Then the biometric prompt is re-triggered even if I unlocked the app moments ago
+      And a successful match is required for that specific action
+      And a failed match does not lock the entire app — only that action is blocked
+    status: active
+
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+technical_notes: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+edge_cases: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+implementation_status: null

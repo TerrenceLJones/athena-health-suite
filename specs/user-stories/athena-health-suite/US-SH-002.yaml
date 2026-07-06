@@ -1,0 +1,98 @@
+id: US-SH-002
+app: shared
+feature_area: 'Accessibility'
+title: 'WCAG 2.1 AA Accessibility Compliance'
+status: DRAFT
+dependencies:
+  - US-AP-004
+  - US-AF-004
+created_by_epic: EPIC-SH-001
+created_date: '2026-07-06'
+history: []
+
+user_story:
+  persona: |
+    A clinician who uses assistive technology (screen reader, keyboard-only navigation) or has low vision or motor-precision constraints, using either Athena Provider or Athena Field
+  capability: |
+    have every clinical severity, freshness, and validation state conveyed through more than color alone, navigate the entire Provider chart by keyboard with a visible focus indicator, have screen readers announce clinical values and state changes accurately, and interact with touch targets sized for real-world use in the field
+  business_value: |
+    A clinical severity indicator that relies on color alone is invisible to a colorblind clinician and unannounced to a screen-reader user — in a health application that is not a cosmetic accessibility gap, it's a channel through which clinical information silently fails to reach a subset of clinicians. Enforcing WCAG 2.1 AA as a CI gate rather than a best-effort target keeps that channel from regressing silently.
+  description: |
+    Covers the never-color-alone rule applied consistently across AlertCard severity, VitalTile freshness, ObservationStatusBadge, SyncStatusBar, and all other clinical state badges (icon + text label always accompany color), full keyboard navigability of the Provider chart in logical document order with a minimum 3px focus ring and every critical action keyboard-reachable, accurate screen-reader announcement of VitalTile values including live-region announcement of freshness-state transitions, focus-trapped and non-Escape-dismissible behavior for the Critical CDS alert modal with its title and required action announced to screen readers, aria-describedby-associated and live-region-announced form validation errors in plain language, a 44×44px minimum touch target for primary controls on Athena Field even inside condensed data tables, explicit strikethrough-plus-text-label treatment (not color alone) for entered-in-error values, and the CI-level axe-playwright accessibility scan that fails the build on any WCAG 2.1 AA violation rather than allowing silent regression.
+
+acceptance_criteria:
+  - id: AC-01
+    title: 'Clinical severity indicators are never color-only'
+    description: |
+      Given any UI element conveys a clinical severity (critical, advisory, informational, stale, preliminary, entered-in-error)
+      When it is rendered
+      Then it includes both an icon and a text label in addition to color
+      And this applies to: AlertCard severity, VitalTile freshness state, ObservationStatusBadge, SyncStatusBar, BudgetGauge equivalents, and all clinical state badges
+    status: active
+  - id: AC-02
+    title: 'Keyboard-only navigation through the Provider chart'
+    description: |
+      Given I am navigating the Athena Provider chart using only a keyboard
+      When I tab through the page
+      Then focus moves in a logical document order through all interactive elements
+      And each focused element has a visible focus ring of at least 3px
+      And all critical actions (sign note, override alert, submit form) are reachable and activatable via keyboard alone
+    status: active
+  - id: AC-03
+    title: 'Screen reader announces a VitalTile value correctly'
+    description: |
+      Given a screen reader user is viewing the vitals dashboard
+      When a VitalTile is read
+      Then the announcement is "Systolic BP: 128 millimeters of mercury, final, updated 2 minutes ago"
+      And freshness state changes are announced via an aria-live region
+      And the "stale" or "disconnected" state change is announced as it occurs
+    status: active
+  - id: AC-04
+    title: 'Critical alert modal is focus-trapped'
+    description: |
+      Given a Critical CDS alert modal is open
+      When it is displayed
+      Then keyboard focus is trapped within the modal
+      And pressing Escape does not close or dismiss it (dismissal requires an explicit action)
+      And screen readers announce the modal's title and the required action
+    status: active
+  - id: AC-05
+    title: 'Form validation errors are announced to screen readers'
+    description: |
+      Given I submit a QuestionnaireResponse form with a validation error
+      When the error appears
+      Then it is associated with the erroring field via aria-describedby
+      And it is announced via a role="alert" or role="status" live region
+      And the error message is in plain language — not a FHIR validation code
+    status: active
+  - id: AC-06
+    title: 'Minimum touch target size on Athena Field'
+    description: |
+      Given I am using Athena Field on a mobile device
+      When I view any primary interactive control (buttons, toggles, checkboxes)
+      Then each control has a minimum touch target of 44×44px
+      And this applies even when controls appear in condensed clinical data tables
+    status: active
+  - id: AC-07
+    title: '"entered-in-error" is conveyed without color alone'
+    description: |
+      Given an Observation with "entered-in-error" status is shown
+      When it is rendered
+      Then it shows strikethrough styling plus the explicit text label "Entered in error"
+      And a screen reader user hears "Entered in error" when navigating to the value
+    status: active
+  - id: AC-08
+    title: 'Accessibility error in CI blocks deployment'
+    description: |
+      Given the axe-playwright accessibility scan runs on all Athena Provider surfaces
+      When any WCAG 2.1 AA violation is detected
+      Then the CI build fails and the violation is reported with the specific element and rule
+      And no accessibility regression is deployable without explicit acknowledgment and a fix plan
+    status: active
+
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+technical_notes: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+edge_cases: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+implementation_status: null

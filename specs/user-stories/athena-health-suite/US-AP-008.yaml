@@ -1,0 +1,90 @@
+id: US-AP-008
+app: athena-provider
+feature_area: 'Prior Authorization Tracker'
+title: 'Prior Authorization Status Tracker'
+status: DRAFT
+dependencies:
+  - US-AP-001
+created_by_epic: EPIC-AP-004
+created_date: '2026-07-06'
+history: []
+
+user_story:
+  persona: |
+    A clinician tracking the status of a prior authorization request through payer review
+  capability: |
+    see an unambiguous, regulation-aware status for every prior authorization — including a clear turnaround deadline and an explicit "unknown" state that is never confused with "approved" — as it moves through the XState-modeled PA lifecycle
+  business_value: |
+    Prior authorization delays directly delay patient care; a status tracker that ever displayed an unconfirmed or unknown status as "approved" could cause a clinician to proceed with a treatment that isn't actually authorized. Explicit CMS-0057-F turnaround deadlines (72-hour urgent / 7-day standard) and escalation warnings when those deadlines are exceeded keep overdue PAs visible rather than silently stalled.
+  description: |
+    Covers the XState PA machine's transitions from submission (with CMS-0057-F-compliant deadline display) through additional-documentation-requested, approved (with authorization number and a FHIR Claim/CoverageEligibilityResponse record), and denied (with a plain-language reason and a surfaced appeal option), plus the hard invariant that an unconfirmed or unrecognized status is always shown as "Status unknown — do not assume approved" and blocks any action requiring authorization, and the two turnaround-deadline-exceeded warnings (a dismissible standard-PA overdue notice vs. a non-dismissible critical-tier alert for an overdue urgent PA).
+
+acceptance_criteria:
+  - id: AC-01
+    title: 'Prior auth submitted and pending'
+    description: |
+      Given a clinician initiates a prior authorization request
+      When the PA is submitted
+      Then the XState PA machine transitions to "submitted"
+      And the status displays "Pending — awaiting payer decision"
+      And the submission timestamp and turnaround deadline are shown
+      And the deadline reflects CMS-0057-F requirements: 72 hours for urgent, 7 calendar days for standard
+    status: active
+  - id: AC-02
+    title: 'Additional documentation requested by the payer'
+    description: |
+      Given a PA is pending
+      When the payer requests additional documentation
+      Then the PA status updates to "Additional documentation needed"
+      And a specific list of requested items is shown if available
+      And the remaining deadline adjusts appropriately
+    status: active
+  - id: AC-03
+    title: 'PA approved'
+    description: |
+      Given a PA is under review
+      When the payer approves it
+      Then the status updates to "Approved" with the approval date and authorization number
+      And a FHIR Claim or CoverageEligibilityResponse (per the API) records the approval
+    status: active
+  - id: AC-04
+    title: 'PA denied with reason'
+    description: |
+      Given a PA is under review
+      When the payer denies it
+      Then the status updates to "Denied" with the denial reason visible in plain language
+      And an appeal option is surfaced
+      And the specific denial reason is shown (required under CMS-0057-F for applicable payers)
+    status: active
+  - id: AC-05
+    title: 'PA status unknown — never shown as approved'
+    description: |
+      Given a PA's current status cannot be confirmed (e.g., the API call failed or returned an unrecognized status)
+      When the status is displayed
+      Then I see "Status unknown — do not assume approved"
+      And no action that requires prior authorization proceeds until the status is confirmed
+      And this is a hard invariant: an unverified PA status is never displayed as approved
+    status: active
+  - id: AC-06
+    title: 'PA turnaround clock exceeded'
+    description: |
+      Given a standard PA has been pending for more than 7 calendar days
+      When I view the PA tracker
+      Then a warning indicates the turnaround deadline has passed
+      And I see "Payer response overdue — consider escalating" with a contact path
+    status: active
+  - id: AC-07
+    title: 'Urgent PA turnaround clock exceeded'
+    description: |
+      Given an urgent PA has been pending for more than 72 hours
+      When I view the PA tracker
+      Then a critical-tier alert appears: "Urgent PA response overdue — patient care may be delayed"
+      And this is never a dismissible informational badge — it requires acknowledgment
+    status: active
+
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+technical_notes: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+edge_cases: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+implementation_status: null

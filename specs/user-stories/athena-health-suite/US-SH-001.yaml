@@ -1,0 +1,92 @@
+id: US-SH-001
+app: shared
+feature_area: 'HIPAA Compliance'
+title: 'HIPAA Technical Safeguard Compliance'
+status: DRAFT
+dependencies:
+  - US-AP-001
+  - US-AF-002
+created_by_epic: EPIC-SH-001
+created_date: '2026-07-06'
+history: []
+
+user_story:
+  persona: |
+    A compliance-minded engineer or auditor verifying that Athena Provider and Athena Field never leak PHI through an unsafe channel
+  capability: |
+    have PHI's exposure surfaces — URLs, browser storage, analytics, error reports, and the Anthropic API integration — closed by construction (compile-time enforcement and architectural boundaries) rather than by convention, alongside the auto-logoff session-timeout safeguard
+  business_value: |
+    HIPAA breach reporting obligations turn on whether PHI was actually exposed, not on whether a developer meant to expose it; branded PHI<T> types that make accidental logging a compile error, and a BAA-scoped server-side-only boundary for the one third-party API that touches PHI, convert "we have a policy against this" into "this cannot compile" or "this cannot happen" — a categorically stronger guarantee.
+  description: |
+    Covers the seven structural PHI-safety invariants that apply across both apps: PHI never appearing in any URL (enforced via the usePhiSafeNavigation wrapper, with a raw router.push() carrying PHI treated as a lint-time compile error), PHI never persisted to localStorage or sessionStorage (memory-only on the web client, garbage-collected at session end), PHI never appearing in analytics event payloads (enforced by the PHI<T> branded type at the type level), PHI scrubbed from error reports before they leave the device (Sentry's beforeSend hook strips request bodies and known PHI keys, replacing patient IDs in URLs with a redaction placeholder), the PHI<T> branded type itself producing a TypeScript compiler error when passed to a non-PHI-accepting sink, the 15-minute HIPAA auto-logoff enforced as a floor that cannot be configured lower by any user-facing setting, and the requirement that the Anthropic API (the one third-party service that processes PHI, via encounter transcripts) is called only from a server-side route that alone holds the API key, per the BAA.
+
+acceptance_criteria:
+  - id: AC-01
+    title: 'PHI is never present in a URL'
+    description: |
+      Given any navigation within Athena Provider or Athena Field
+      When a URL is generated for any route
+      Then the URL contains only opaque FHIR resource IDs (e.g., /patient/f47ac10b-58cc-4372-a567-0e02b2c3d479)
+      And the URL never contains a patient name, date of birth, MRN, SSN, or any other PHI as a path segment or query parameter
+      And this is enforced by the usePhiSafeNavigation wrapper — direct router.push() calls with PHI are a compile error via linting
+    status: active
+  - id: AC-02
+    title: 'PHI is never stored in localStorage or sessionStorage'
+    description: |
+      Given any clinical data is loaded from the FHIR server
+      When it is stored client-side (web)
+      Then it lives in memory only during the active session
+      And no patient name, date of birth, MRN, observation value, or any other PHI is written to localStorage or sessionStorage
+      And on session end or page close, in-memory PHI is garbage-collected
+    status: active
+  - id: AC-03
+    title: 'PHI is never included in analytics events'
+    description: |
+      Given any user interaction that occurs in the context of a patient chart
+      When an analytics event is emitted
+      Then the event payload contains only resource types and event types (e.g., { event: "vitals_viewed", resourceType: "Observation" })
+      And the event payload never contains a patient identifier, name, value, or any PHI
+      And this is enforced by the PHI<T> branded type — analytics functions accept only non-PHI strings at the type level
+    status: active
+  - id: AC-04
+    title: 'PHI is scrubbed from error reports before they leave the device'
+    description: |
+      Given a JavaScript error occurs in the context of a patient chart
+      When the error is reported to the error-tracking service (Sentry)
+      Then the beforeSend hook strips all request bodies and scrubs known PHI keys from the event
+      And only the error type, stack trace, and scrubbed context are transmitted
+      And the patient ID in a URL is replaced with a placeholder (e.g., "[REDACTED_PATIENT_ID]") before transmission
+    status: active
+  - id: AC-05
+    title: 'PHI-safe branded type blocks PHI from reaching unsafe sinks'
+    description: |
+      Given a PHI<string> value (e.g., a patient family name) is marked at the point of receipt from the FHIR server
+      When code attempts to pass this value to a function that accepts only non-PHI strings (e.g., logEvent, sendAnalytics)
+      Then the TypeScript compiler emits an error
+      And the developer must explicitly strip or redact the PHI before the call — accidental PHI logging is a compile-time error, not a runtime one
+    status: active
+  - id: AC-06
+    title: 'Auto-logoff enforces HIPAA session timeout'
+    description: |
+      Given the HIPAA auto-logoff policy is 15 minutes of inactivity
+      When this threshold is reached
+      Then the session is terminated, in-memory tokens are cleared, and any open Subscription connections are closed
+      And the 15-minute timer is reset by any user interaction (mouse, keyboard, touch, scroll)
+      And the timer is not configurable below 15 minutes through any user-facing setting
+    status: active
+  - id: AC-07
+    title: 'PHI handling on Anthropic API calls'
+    description: |
+      Given the AI documentation feature processes encounter transcript text (which is PHI)
+      When the Anthropic API is called
+      Then the call is made from a server-side route only — the API key and the PHI payload never appear in any client-side request, browser network tab, or client-side log
+      And the server-side proxy is the only component that holds the API key and constructs the prompt
+      And this architecture is required by the BAA — PHI must be handled only by BAA-covered components
+    status: active
+
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+technical_notes: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+edge_cases: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+implementation_status: null

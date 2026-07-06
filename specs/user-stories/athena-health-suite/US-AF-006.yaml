@@ -1,0 +1,78 @@
+id: US-AF-006
+app: athena-field
+feature_area: 'Sync Status & Push Notifications'
+title: 'Sync Status Visibility & Push Notifications'
+status: DRAFT
+dependencies:
+  - US-AF-002
+  - US-AF-003
+created_by_epic: EPIC-AF-002
+created_date: '2026-07-06'
+history: []
+
+user_story:
+  persona: |
+    A field clinician who needs to know at a glance whether their documentation has actually reached the server
+  capability: |
+    see the current outbox state — pending, all-synced, conflicted, or failed — reflected accurately in a SyncStatusBar that routes me directly to the right action, and trust that any push notification about a visit always triggers a fresh fetch rather than showing me stale, possibly-wrong data from the notification payload itself
+  business_value: |
+    A field clinician who believes documentation has synced when it hasn't may make care decisions based on data that never reached the record; a status bar with accurate, tappable per-state indicators — combined with push notifications that never render their own embedded snapshot as current truth — keeps "did this actually sync?" and "is this visit assignment still accurate?" answerable at a glance instead of assumed.
+  description: |
+    Covers the SyncStatusBar's pending/all-synced/conflict/failed states (with conflict tapping directly into the ConflictResolutionDialog and failed retry re-attempting only the failed record, not a full resync), and push-notification handling that always re-fetches the referenced resource's current server state before rendering — whether the device was offline when the notification arrived, whether the visit has since been cancelled, or whether it has been reassigned to another clinician — so the notification's own embedded snapshot is never treated as live clinical or scheduling truth.
+
+acceptance_criteria:
+  - id: AC-01
+    title: 'SyncStatusBar reflects current outbox state'
+    description: |
+      Given I have completed two visits while offline
+      When I view the SyncStatusBar
+      Then it shows "2 pending" with a pending-sync icon
+      And after sync completes, it shows "All synced" with a checkmark
+    status: active
+  - id: AC-02
+    title: 'SyncStatusBar shows conflict state'
+    description: |
+      Given a sync conflict exists
+      When I view the SyncStatusBar
+      Then it shows "1 conflict — tap to resolve" with a warning icon
+      And tapping it navigates directly to the ConflictResolutionDialog
+    status: active
+  - id: AC-03
+    title: 'SyncStatusBar shows failure state'
+    description: |
+      Given a sync failed for one record
+      When I view the SyncStatusBar
+      Then it shows "1 failed to sync — tap to retry" with an error icon
+      And tapping "retry" re-attempts only the failed record (not the full sync)
+    status: active
+  - id: AC-04
+    title: 'Push notification received for a visit update'
+    description: |
+      Given I receive a push notification referencing a visit assignment
+      When I tap the notification
+      Then the app re-fetches the current state of the referenced resource from the server before rendering
+      And the notification's embedded snapshot data is never rendered as live clinical data
+      And if the visit has been cancelled, I see the current cancelled status — not the snapshot from when the notification was sent
+    status: active
+  - id: AC-05
+    title: 'Push notification received while the device is offline'
+    description: |
+      Given my device has no connectivity
+      When a push notification arrives (delivered by the OS push service)
+      Then upon tapping the notification after connectivity is restored, the app fetches fresh data
+      And stale notification payload data is never used as the source of truth for clinical information
+    status: active
+  - id: AC-06
+    title: 'Push notification for a reassigned visit'
+    description: |
+      Given I receive a push notification for a visit that was reassigned to another clinician after the notification was sent
+      When I tap the notification
+      Then after fetching the current resource, I see "This visit is no longer assigned to you" — not the visit content from the notification
+    status: active
+
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+technical_notes: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+edge_cases: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+implementation_status: null

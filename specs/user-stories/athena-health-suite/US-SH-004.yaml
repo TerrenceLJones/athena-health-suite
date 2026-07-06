@@ -1,0 +1,70 @@
+id: US-SH-004
+app: shared
+feature_area: 'design-system'
+title: 'Token Pipeline'
+status: DRAFT
+dependencies: []
+created_by_epic: EPIC-SH-000
+created_date: '2026-07-06'
+history: []
+
+user_story:
+  persona: |
+    A frontend engineer on either Athena Provider or Athena Field implementing any component that needs color, typography, spacing, or radius values
+  capability: |
+    consume athena-tokens.json as the single source of truth for every primitive, semantic, and theme token — compiled into typed constants and light/dark CSS custom properties — rather than hand-coding hex values, font sizes, or spacing numbers per component
+  business_value: |
+    A design token that lives in three places (Figma, the Provider stylesheet, the Field stylesheet) drifts the moment one of those three is edited without the others; compiling everything from one committed manifest means a single edit to athena-tokens.json is the only edit required, and both apps' themes — and Figma's own Variables — stay provably in sync with it.
+  description: |
+    Covers the token pipeline end to end: the primitive tier (neutral and teal color ramps, severity-primitive swatches), the semantic tier (severity tokens pairing color with icon/shape/label; dataStatus tokens for preliminary/final/live/stale/disconnected/error), the theme tier (light and dark CSS custom-property sets), the typography scale (display/title/heading/lead/body/label/mono), and the spacing/radius scale — each read directly from athena-tokens.json's own top-level sections and exported from libs/design-tokens/ as typed constants plus a build step that emits per-theme CSS custom properties.
+
+acceptance_criteria:
+  - id: AC-01
+    title: 'Primitive color ramps are exported as typed constants'
+    description: |
+      Given libs/design-tokens/ is built
+      When a consumer imports the primitive palette
+      Then the neutral and teal ramps match athena-tokens.json's `primitive.neutral` and `primitive.teal` values exactly, with no hand-duplicated hex values anywhere else in either app
+    status: active
+  - id: AC-02
+    title: 'Severity semantic tokens carry color, icon, shape, and label together'
+    description: |
+      Given a consumer imports a severity token (critical, advisory, info, or stale)
+      When it renders a status indicator
+      Then the token exposes color, icon name, shape, and label as one unit — never color alone — matching athena-tokens.json's `severity` section
+    status: active
+  - id: AC-03
+    title: 'dataStatus tokens cover all six clinical data states'
+    description: |
+      Given a consumer needs to render a clinical data-freshness or lifecycle state
+      When it imports from the dataStatus tokens
+      Then preliminary, final, live, stale, disconnected, and error are all available, matching athena-tokens.json's `dataStatus` section, including each state's label pattern (e.g. "Last updated {time}")
+    status: active
+  - id: AC-04
+    title: 'Light and dark themes compile to CSS custom properties'
+    description: |
+      Given the token build step runs
+      When it emits output for the light and dark themes
+      Then every value in athena-tokens.json's `theme.light` and `theme.dark` is available as a CSS custom property, consumable by both apps without either one re-deriving the value
+    status: active
+  - id: AC-05
+    title: 'Typography and spacing scales are exported as typed constants'
+    description: |
+      Given a consumer imports the typography or spacing/radius tokens
+      When it applies a text style or layout dimension
+      Then the values match athena-tokens.json's `typography.scale` and `spacing`/`radius` sections exactly
+    status: active
+  - id: AC-06
+    title: 'athena-tokens.json is the only edited source'
+    description: |
+      Given a designer or engineer needs to change a token value
+      When they make the change
+      Then editing athena-tokens.json alone is sufficient — no hand-maintained duplicate of any token value exists in libs/design-tokens/, the Provider app, the Field app, or Figma
+    status: active
+
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+technical_notes: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+edge_cases: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+implementation_status: null

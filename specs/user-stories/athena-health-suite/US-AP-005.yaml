@@ -1,0 +1,128 @@
+id: US-AP-005
+app: athena-provider
+feature_area: 'FHIR Patient Chart Rendering'
+title: 'FHIR Patient Chart Rendering'
+status: DRAFT
+dependencies:
+  - US-AP-002
+created_by_epic: EPIC-AP-002
+created_date: '2026-07-06'
+history: []
+
+user_story:
+  persona: |
+    A clinician viewing a patient's chart in Athena Provider
+  capability: |
+    have every FHIR resource in the chart render correctly per its actual status, and have every class of FHIR error (404/401/403/422/429/500/timeout) fail in a scoped, plain-language way that never invents data or crashes the whole chart
+  business_value: |
+    A chart that silently mishandles resource status (e.g., showing an entered-in-error observation as valid, or a stopped medication as active) is a direct patient-safety risk; a chart where one panel's error takes down the whole page blocks care entirely. Status-correct rendering and per-section error boundaries keep the rest of the chart usable when any one resource or request fails.
+  description: |
+    Covers status-appropriate rendering of Observations (final/amended/corrected normal, preliminary badged, entered-in-error filtered-by-default and struck-through only if expanded, unrecognized flagged) and MedicationRequests (active unqualified, stopped with date, entered-in-error filtered, unknown flagged), the full FHIR error-response taxonomy scoped to the affected chart section (404 not-found, 401 silent-refresh-then-replay, 403 scope-limited to the affected panel, 422 field-level plain-language validation errors mapped from OperationOutcome, 429 respecting Retry-After with backoff, 500 contained by a scoped error boundary with scrubbed logging, and network timeout with local draft preservation), correct construction of patient names from the FHIR HumanName array with a safe "Unknown" fallback, and the PHI-safety invariant that chart URLs contain only opaque FHIR resource IDs.
+
+acceptance_criteria:
+  - id: AC-01
+    title: 'Observations display with status-appropriate treatment'
+    description: |
+      Given a patient chart is loaded with a mix of Observations in various statuses
+      When the chart renders
+      Then "final", "amended", and "corrected" Observations display normally
+      And "preliminary" Observations display with a blue "Unconfirmed" badge
+      And "entered-in-error" Observations are filtered by default and only shown struck-through with the label "Entered in error" if explicitly expanded
+      And "unknown" and unrecognized statuses display "Unrecognized status — review in source system"
+    status: active
+  - id: AC-02
+    title: 'FHIR 404 — resource not found'
+    description: |
+      Given a chart section requests a FHIR resource
+      When the server returns 404
+      Then the affected section shows "This record may have been moved or removed."
+      And no placeholder or invented data is shown
+      And the section's error boundary is scoped so other chart sections continue to render
+    status: active
+  - id: AC-03
+    title: 'FHIR 401 — token expired mid-chart'
+    description: |
+      Given I am viewing a patient chart
+      When a FHIR request returns 401
+      Then the client silently attempts a token refresh
+      And if the refresh succeeds, the request is replayed
+      And if the refresh fails, I see "Your session needs to refresh. Your work is saved." with a re-auth modal
+    status: active
+  - id: AC-04
+    title: 'FHIR 403 — insufficient scope for a chart section'
+    description: |
+      Given my SMART scope does not include MedicationRequest read
+      When the medications panel loads
+      Then only the medications panel shows "You don't have access to this information."
+      And other panels with appropriate scope continue loading normally
+    status: active
+  - id: AC-05
+    title: 'FHIR 422 — validation failure on save'
+    description: |
+      Given I attempt to save a clinical resource that fails FHIR R4 validation
+      When the server returns 422 with an OperationOutcome
+      Then each issue in OperationOutcome.issue[] is parsed and mapped to a specific field
+      And the error is shown in plain language at the field level
+      And no FHIR technical codes (e.g., "FHIR R4/Observation/valueQuantity must have unit") are shown directly to the clinician
+    status: active
+  - id: AC-06
+    title: 'FHIR 429 — rate limited'
+    description: |
+      Given a burst of FHIR requests triggers rate limiting
+      When 429 responses arrive
+      Then the client respects the Retry-After header
+      And I see "Loading is taking longer than usual." with a spinner
+      And retries happen automatically with exponential backoff
+    status: active
+  - id: AC-07
+    title: 'FHIR 500 — server error'
+    description: |
+      Given a FHIR request results in a server error
+      When a 500 response arrives
+      Then a scoped error boundary contains the failure to the affected section
+      And I see "Something went wrong on our end." with a retry option in that section
+      And the rest of the chart continues to render
+      And the error is logged with scrubbed context (no PHI in the error report)
+    status: active
+  - id: AC-08
+    title: 'FHIR network timeout'
+    description: |
+      Given a FHIR request exceeds the timeout threshold
+      When no response has arrived
+      Then I see "This is taking longer than usual — retrying." in the affected section
+      And any in-progress documentation is preserved locally
+      And the client retries with backoff
+    status: active
+  - id: AC-09
+    title: 'MedicationRequest displayed with correct FHIR status'
+    description: |
+      Given a patient has MedicationRequests in various statuses
+      When the medications panel renders
+      Then active MedicationRequests display without a status qualifier
+      And stopped MedicationRequests display "Stopped" with the stop date
+      And entered-in-error MedicationRequests are filtered from the active list
+      And unknown statuses display "Unrecognized status — review in source system"
+    status: active
+  - id: AC-10
+    title: 'Patient name rendered from FHIR HumanName array'
+    description: |
+      Given a FHIR Patient resource with a name array
+      When the patient's name is displayed
+      Then it is constructed from HumanName.given and HumanName.family
+      And if neither is present, "Unknown" is shown — never a null or undefined crash
+    status: active
+  - id: AC-11
+    title: 'Patient chart PHI safety'
+    description: |
+      Given I navigate between patient charts
+      When a chart URL is generated
+      Then it contains only the opaque FHIR Patient resource ID
+      And it never contains the patient's name, date of birth, MRN, or any other PHI in any URL parameter or path segment
+    status: active
+
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+technical_notes: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+edge_cases: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+implementation_status: null

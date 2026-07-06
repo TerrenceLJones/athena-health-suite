@@ -1,0 +1,134 @@
+id: US-AP-007
+app: athena-provider
+feature_area: 'AI Documentation Assistant'
+title: 'AI-Assisted Clinical Documentation with Mandatory Human-in-the-Loop'
+status: DRAFT
+dependencies:
+  - US-AP-005
+  - US-AP-009
+created_by_epic: EPIC-AP-003
+created_date: '2026-07-06'
+history: []
+
+user_story:
+  persona: |
+    A clinician reviewing an AI-generated ambient note draft after a recorded encounter
+  capability: |
+    have an encounter recording turned into a streaming, evidence-linked SOAP note draft that I can review sentence-by-sentence and edit, with signing hard-blocked until every sentence has been reviewed, edited, or explicitly confirmed
+  business_value: |
+    Ambient documentation only earns clinical trust if it is impossible for unreviewed or confabulated AI content to silently enter the permanent record — the evidence-link-to-transcript pattern, confidence/no-evidence flagging, and the sign-off gate make human review a structural guarantee rather than a workflow suggestion, while keeping the clinician as sole author of record.
+  description: |
+    Covers progressive token streaming into the AIDocumentPanel with clickable evidence links per sentence, evidence-link interaction that highlights and seeks the source transcript, confabulation signaling for sentences with no grounded transcript span and low-confidence flagging (both requiring explicit review before signing), the hard-blocking sign gate that lists every unreviewed span and only allows signing once each is reviewed/edited/confirmed, clinician edit attribution (edits are the clinician's, never the AI's), the sign transition from Draft to Final with a FHIR AuditEvent recording that AI assistance was used and that review was completed, stream-interruption and clinician-cancellation handling (both leave the note "Incomplete — do not sign" with the partial content preserved), graceful degradation to manual charting on AI rate-limiting, and the ONC HTI-1 model-facts panel required wherever the feature is used in a certified EHR context. Requires an active encounter (US-AP-009) to attach the note to and a loaded chart (US-AP-005) to render the panel in.
+
+acceptance_criteria:
+  - id: AC-01
+    title: 'Successful ambient note generation and streaming'
+    description: |
+      Given an encounter recording session has completed
+      When the AI documentation pipeline produces a SOAP note draft
+      Then tokens stream progressively into the AIDocumentPanel as they arrive
+      And each sentence in the draft has a clickable evidence link
+      And the note status shows "Draft — not filed"
+      And the Anthropic API was called server-side only — the API key never appears in client-side code or network requests visible to the browser
+      And no audio or transcript text is sent to any analytics service or logged in any client-side logger
+    status: active
+  - id: AC-02
+    title: 'Clinician clicks an evidence link'
+    description: |
+      Given the AI note is displayed with evidence-linked sentences
+      When I click a sentence's evidence link
+      Then the corresponding transcript segment is highlighted in the transcript panel
+      And the audio player seeks to and plays from that timestamp
+      And that sentence is marked as "reviewed"
+    status: active
+  - id: AC-03
+    title: 'Sentence with no transcript evidence (confabulation signal)'
+    description: |
+      Given the AI pipeline produced a sentence with no grounded transcript span
+      When this sentence is rendered
+      Then it is highlighted in amber with the label "No source found — review carefully"
+      And it is not blocked, but it must be explicitly confirmed before signing
+      And a confabulation is never silently allowed into a signed note
+    status: active
+  - id: AC-04
+    title: 'Sentence with low confidence'
+    description: |
+      Given the AI pipeline flagged a sentence as low-confidence
+      When this sentence is rendered
+      Then it is marked with a "Low confidence — please verify" indicator
+      And it must be reviewed or explicitly confirmed before signing
+    status: active
+  - id: AC-05
+    title: 'Clinician attempts to sign with unreviewed spans'
+    description: |
+      Given the AI note has 3 sentences that have not been reviewed (evidence link not clicked or confirmed)
+      When the clinician clicks "Sign"
+      Then signing is hard-blocked
+      And a warning dialog lists the unreviewed spans: "You have 3 unreviewed sections. Review them before signing."
+      And signing proceeds only after each unreviewed span is either: (a) reviewed by clicking its evidence link, (b) edited, or (c) explicitly confirmed with an acknowledgment
+      And this gate is the core patient-safety invariant: no unreviewed AI content may silently enter a signed clinical record
+    status: active
+  - id: AC-06
+    title: 'Clinician edits the AI draft'
+    description: |
+      Given the AI note draft is displayed
+      When the clinician edits one or more sentences
+      Then the edits are preserved and attributed to the clinician (not to the AI model)
+      And edited sentences are visually distinguished from unedited AI output
+      And editing a sentence counts as reviewing it for the sign-off gate
+    status: active
+  - id: AC-07
+    title: 'Clinician signs the reviewed and edited note'
+    description: |
+      Given all spans have been reviewed, edited, or confirmed
+      When the clinician clicks "Sign" and confirms
+      Then the note status transitions from "Draft" to "Final"
+      And the note is filed to the FHIR server as a DocumentReference or DiagnosticReport (per the EHR's requirements)
+      And a FHIR AuditEvent records: clinician ID + timestamp + confirmation that review was completed + the fact that AI assistance was used
+      And the AI model is never listed as a signatory — the clinician is the sole author of record
+    status: active
+  - id: AC-08
+    title: 'AI stream is interrupted mid-note'
+    description: |
+      Given the AI note is streaming
+      When the connection drops before the stream completes (no "message_stop" event received)
+      Then the partial note is preserved exactly as streamed
+      And the note status changes to "Incomplete — do not sign"
+      And "Resume" and "Start over" options are offered
+      And the incomplete note is never signable in its current state
+    status: active
+  - id: AC-09
+    title: 'Clinician cancels the AI stream'
+    description: |
+      Given the AI note is streaming
+      When the clinician clicks "Cancel"
+      Then the server-side AbortController fires, terminating the upstream Anthropic API call
+      And the partial note is preserved
+      And the note is marked "Incomplete — do not sign"
+      And no further tokens arrive after the cancellation
+    status: active
+  - id: AC-10
+    title: 'AI model is rate limited'
+    description: |
+      Given the Anthropic API returns a rate-limit error
+      When this occurs
+      Then I see "Documentation assistant is busy. You can write the note manually while we retry."
+      And the manual note editor is immediately available with no loading state or block
+      And manual charting is never blocked by an AI service failure
+    status: active
+  - id: AC-11
+    title: 'ONC HTI-1 model-facts panel is accessible'
+    description: |
+      Given the AI documentation panel is open
+      When I click "About this AI"
+      Then a collapsible panel opens showing: purpose, intended population, training data description, validation methodology and known accuracy figures (cited as self-reported), fairness assessment, known limitations, and last-reviewed date
+      And this panel is present whenever the AI documentation feature is used in a certified EHR context
+      And none of the content in this panel is marketing — it reflects the actual model's documented properties
+    status: active
+
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+technical_notes: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+edge_cases: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+implementation_status: null

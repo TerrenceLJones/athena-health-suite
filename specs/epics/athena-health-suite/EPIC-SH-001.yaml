@@ -1,0 +1,80 @@
+epic_id: EPIC-SH-001
+title: 'Cross-Cutting Compliance & Accessibility'
+app: shared
+feature_area: 'Compliance & Accessibility'
+status: DRAFT
+approved_date: null
+created_date: '2026-07-06'
+
+source_reference:
+  - 'docs/reference/athena-health-suite-plan.md §5 Shared Design System (@athena/ui) — WCAG 2.1 AA built in'
+  - 'docs/reference/athena-health-suite-plan.md §11 HIPAA Compliance Patterns'
+  - 'docs/reference/athena-health-suite-plan.md §16 Architecture Decision Records — ADR-004 (PHI storage)'
+  - 'docs/reference/athena-mock-backend-architecture.md — AuditEventVerifier (verify PHI access is being logged)'
+  - 'docs/reference/athena-mock-backend-architecture.md ADR-007 (Clinical backend strategy — real Medplum FHIR server + surgical MSW fault injection)'
+  - 'docs/reference/athena-user-stories-gherkin.md §16 HIPAA Compliance (Cross-Cutting)'
+  - 'docs/reference/athena-user-stories-gherkin.md §17 Accessibility (Cross-Cutting)'
+  - 'docs/reference/athena-user-stories-gherkin.md §18 Audit Logging (Cross-Cutting)'
+
+package_location:
+  - libs/compliance/
+  - apps/athena-provider/
+  - apps/athena-field/
+
+deployment_unit: 'apps/athena-provider (Vercel) + apps/athena-field (EAS)'
+
+adr_reference:
+  - ADR-004
+  - ADR-007
+
+depends_on_epics:
+  - EPIC-AP-001
+  - EPIC-AP-002
+  - EPIC-AF-001
+
+extends_stories: []
+
+reuses_from: []
+
+has_ui: true
+
+changes:
+  adds:
+    - story_id: US-SH-001
+      story_path: specs/user-stories/athena-health-suite/US-SH-001.yaml
+      title: 'HIPAA Technical Safeguard Compliance'
+    - story_id: US-SH-002
+      story_path: specs/user-stories/athena-health-suite/US-SH-002.yaml
+      title: 'WCAG 2.1 AA Accessibility Compliance'
+    - story_id: US-SH-003
+      story_path: specs/user-stories/athena-health-suite/US-SH-003.yaml
+      title: 'FHIR AuditEvent Logging for PHI Access & Clinical Actions'
+  updates: []
+  deprecates: []
+  removes: []
+
+notes: |
+  Groups the three compliance/quality invariants that cut across both apps rather
+  than belonging to either one: HIPAA technical safeguards (PHI never in URLs,
+  localStorage, analytics, or error reports; compile-time PHI<T> branded-type
+  enforcement; 15-minute auto-logoff), WCAG 2.1 AA accessibility (never color-alone
+  severity, keyboard navigation, screen-reader announcements, focus-trapped modals,
+  44×44px touch targets, CI-blocking axe scans), and FHIR AuditEvent logging (every
+  PHI access, AI sign-off, CDS override, conflict resolution, and PHI reveal writes
+  an immutable audit record). None of these three is scoped to a single app or a
+  single feature area — each applies to both Athena Provider and Athena Field.
+
+  ADR-004 (PHI storage — encrypted at rest, never in URLs/localStorage) applies
+  directly to US-SH-001. ADR-007, defined in the mock-backend architecture doc rather
+  than the main plan (its AuditEventVerifier service exists specifically to verify
+  that PHI access is being logged), applies only to US-SH-003 — it has no bearing on
+  the HIPAA-storage or accessibility stories. US-SH-002 (accessibility) has no ADR of
+  any kind backing it; WCAG 2.1 AA compliance is a design-system commitment (plan §5)
+  rather than an architectural decision with alternatives considered.
+
+  Depends on EPIC-AP-001 (auto-logoff and RBAC are session/identity concerns),
+  EPIC-AP-002 (chart-view audit events and accessibility apply to the rendered chart
+  surfaces), and EPIC-AF-001 (the offline core is where PHI-at-rest encryption and
+  remote-wipe audit events originate) because these stories verify and constrain
+  behavior that those epics' surfaces produce — there is nothing to make compliant or
+  accessible until the underlying identity, chart, and offline surfaces exist.

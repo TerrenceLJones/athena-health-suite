@@ -1,0 +1,68 @@
+epic_id: EPIC-AP-003
+title: 'Provider Clinical Decision Support & AI'
+app: athena-provider
+feature_area: 'Clinical Decision Support & AI'
+status: DRAFT
+approved_date: null
+created_date: '2026-07-06'
+
+source_reference:
+  - 'docs/reference/athena-health-suite-plan.md §6 App 1 — Athena Provider (Web Clinician Console) — Core features 3–4 (CDS Hooks alert rendering, AI documentation assistant)'
+  - 'docs/reference/athena-health-suite-plan.md §8 User Stories & Acceptance Criteria — Story 2 (CDS Hooks alert handling), Story 3 (AI documentation sign-off)'
+  - 'docs/reference/athena-health-suite-plan.md §12 AI Trust UX'
+  - 'docs/reference/athena-health-suite-plan.md §16 Architecture Decision Records — ADR-005 (Alert fatigue mitigation)'
+  - 'docs/reference/athena-user-stories-gherkin.md §6 CDS Hooks Alert System (Athena Provider)'
+  - 'docs/reference/athena-user-stories-gherkin.md §7 AI Documentation Assistant (Athena Provider)'
+
+package_location:
+  - apps/athena-provider/
+  - libs/clinical/cds/
+  - libs/ai/
+
+deployment_unit: 'apps/athena-provider (Vercel)'
+
+adr_reference:
+  - ADR-005
+
+depends_on_epics:
+  - EPIC-AP-002
+
+extends_stories: []
+
+reuses_from: []
+
+has_ui: true
+
+changes:
+  adds:
+    - story_id: US-AP-006
+      story_path: specs/user-stories/athena-health-suite/US-AP-006.yaml
+      title: 'CDS Hooks Tiered Alerts & Override Tracking'
+    - story_id: US-AP-007
+      story_path: specs/user-stories/athena-health-suite/US-AP-007.yaml
+      title: 'AI-Assisted Clinical Documentation with Mandatory Human-in-the-Loop'
+  updates: []
+  deprecates: []
+  removes: []
+
+notes: |
+  Groups the two decision-support surfaces that sit on top of the chart core: CDS
+  Hooks tiered alerting (Critical/Advisory/Informational, required-reason override
+  capture, override-rate tracking) and the AI ambient-documentation assistant
+  (streaming SOAP note draft, evidence-linked sentences, mandatory human-in-the-loop
+  sign-off gate). Both are decision-support layers rendered inside the same chart
+  shell EPIC-AP-002 establishes, and both write only to draft/scratchpad state until
+  a clinician takes an explicit, audited action (override or sign), so they're kept
+  together as one "assistive intelligence" epic rather than split across chart core.
+
+  ADR-005 (Alert fatigue mitigation — tiered severity + override-rate measurement)
+  covers only the CDS half of this epic. The AI documentation assistant's
+  architecture (server-side-only Anthropic calls, evidence linking, ONC HTI-1
+  model-facts panel, the three HITL gates) is documented in plan §12 AI Trust UX but
+  has no numbered ADR of its own — it is not backed by a formal ADR the way the CDS
+  tiering decision is.
+
+  Depends on EPIC-AP-002 rather than directly on EPIC-AP-001, since both CDS cards
+  and the AI documentation panel are rendered inside an already-loaded chart with a
+  known encounter — they assume the chart core exists, not just an authenticated
+  session.

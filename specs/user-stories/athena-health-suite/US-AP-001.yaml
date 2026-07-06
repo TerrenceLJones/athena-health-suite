@@ -1,0 +1,184 @@
+id: US-AP-001
+app: athena-provider
+feature_area: 'Authentication & Session Management'
+title: 'Authentication & Session Management'
+status: DRAFT
+dependencies: []
+created_by_epic: EPIC-AP-001
+created_date: '2026-07-06'
+history: []
+
+user_story:
+  persona: |
+    A clinician using Athena Provider from a shared or personal workstation
+  capability: |
+    securely log in, stay authenticated during active use, and be automatically signed out after a period of inactivity or token expiry
+  business_value: |
+    Protects PHI against unauthorized access from an unattended session while keeping the clinician's active workflow uninterrupted by silent token refresh, satisfying the HIPAA technical safeguard requirement for automatic logoff.
+  description: |
+    Covers standard email/password login and its failure modes (incorrect credentials, account lockout, network failure), the 15-minute HIPAA auto-logoff with inactivity warning and session preservation, silent access-token refresh with replay-attack detection on refresh-token reuse, concurrent-login handling that silently terminates a prior session when the same account signs in from a second device, and the password reset flow. Establishes the identity and session-lifecycle foundation that every other authenticated Provider feature depends on.
+
+acceptance_criteria:
+  - id: AC-01
+    title: 'Successful login'
+    description: |
+      Given I am a registered clinician with a verified account
+      And I am on the Athena Provider login page
+      When I enter my correct credentials and submit
+      Then I am redirected to the patient dashboard
+      And my access token is stored in memory only — never in localStorage or a cookie readable by JavaScript
+      And a refresh token is stored in an httpOnly, Secure, SameSite=Strict cookie
+      And a FHIR AuditEvent is written recording my practitioner ID, timestamp, and IP address
+    status: active
+  - id: AC-02
+    title: 'Login with incorrect credentials'
+    description: |
+      Given I am on the login page
+      When I enter incorrect credentials and submit
+      Then I see "Incorrect email or password"
+      And the password field is cleared
+      And no message reveals whether the email is registered
+    status: active
+  - id: AC-03
+    title: 'Account locked after repeated failures'
+    description: |
+      Given I have failed to log in 5 times within 15 minutes
+      When I attempt to log in again
+      Then I see "Your account is temporarily locked. Contact your administrator to restore access."
+      And a support reference ID is shown
+      And a FHIR AuditEvent records the lockout
+    status: active
+  - id: AC-04
+    title: 'Network failure during login'
+    description: |
+      Given the authentication service is unreachable
+      When I submit valid credentials
+      Then I see "Something went wrong. Retrying…"
+      And the client retries up to 3 times with exponential backoff
+      And after 3 failures I see a manual "Try again" button
+    status: active
+  - id: AC-05
+    title: 'Inactivity warning appears at 14 minutes'
+    description: |
+      Given I am logged in and the auto-logoff timeout is 15 minutes
+      When I have been inactive for 14 minutes
+      Then a modal appears: "You'll be signed out in 60 seconds due to inactivity"
+      And a visible countdown runs in the modal
+    status: active
+  - id: AC-06
+    title: 'Auto-logoff fires at 15 minutes'
+    description: |
+      Given the inactivity warning modal is showing
+      When I take no action within 60 seconds
+      Then I am logged out
+      And my in-memory access token is cleared
+      And any open Subscription WebSocket connections are closed
+      And I see "You were signed out due to inactivity. Please sign in again."
+      And a FHIR AuditEvent records the session end
+    status: active
+  - id: AC-07
+    title: 'Clinician dismisses the inactivity warning'
+    description: |
+      Given the inactivity warning modal is showing
+      When I click "Stay signed in" or interact with the page
+      Then the inactivity timer resets to 15 minutes
+      And the modal closes
+      And my session continues uninterrupted
+    status: active
+  - id: AC-08
+    title: 'Auto-logoff fires during an active encounter'
+    description: |
+      Given I am documenting a patient encounter
+      And the auto-logoff timer fires
+      When the logoff executes
+      Then my in-progress documentation is preserved locally
+      And I see "You were signed out due to inactivity. Your work is saved — sign in to continue."
+      And after re-authentication I am returned to the same documentation with my draft intact
+    status: active
+  - id: AC-09
+    title: 'Silent access-token refresh during active use'
+    description: |
+      Given I am actively using Athena Provider
+      And my access token has expired
+      When I trigger any authenticated FHIR request
+      Then the client silently refreshes the token using the refresh token cookie
+      And the original FHIR request is queued and replayed after the refresh
+      And I see no interruption to my clinical workflow
+    status: active
+  - id: AC-10
+    title: 'Refresh token reuse detected (replay attack signal)'
+    description: |
+      Given my refresh token was already used to mint a new token
+      When the same stale refresh token is presented again
+      Then the server revokes the entire token family
+      And I am logged out immediately
+      And I see "For your security, we signed you out. Please sign in again."
+      And a FHIR AuditEvent flags this as a potential security incident
+    status: active
+  - id: AC-11
+    title: 'Refresh token expired'
+    description: |
+      Given my refresh token lifetime has elapsed
+      When I attempt any authenticated action
+      Then I am logged out and redirected to the login page
+      And I see "Your session expired. Please sign in again."
+      And my prior route is preserved for post-login redirect
+    status: active
+  - id: AC-12
+    title: 'Token expires mid-FHIR-write'
+    description: |
+      Given I am submitting a FHIR resource (e.g., saving a QuestionnaireResponse)
+      And my access token expires before the write completes
+      When the write request fails with 401
+      Then the draft is preserved locally
+      And a re-auth modal appears: "Your session needs to refresh. Your work is saved — sign in to continue."
+      And after re-authentication the write is retried and completed
+    status: active
+  - id: AC-13
+    title: 'Request a password reset'
+    description: |
+      Given I am on the "Forgot password" page
+      When I enter a registered email address and submit
+      Then I see "If that email is registered, we've sent a reset link" regardless of whether it exists
+    status: active
+  - id: AC-14
+    title: 'Reset link has expired'
+    description: |
+      Given I received a reset link more than 1 hour ago
+      When I click the link
+      Then I see "This link has expired. Request a new one."
+    status: active
+  - id: AC-15
+    title: 'Successful password reset'
+    description: |
+      Given I have a valid, unexpired reset link
+      When I set a new password meeting complexity requirements and submit
+      Then my password is updated
+      And all existing refresh tokens for my account are revoked
+      And I am redirected to the login page
+      And I receive an email notifying me that my password was changed
+    status: active
+  - id: AC-16
+    title: 'Login from a second device silently terminates the first session'
+    description: |
+      Given I am logged in and active on Device A
+      When I successfully log in with the same credentials on Device B
+      Then my session on Device A is immediately terminated — its refresh token is revoked and any open Subscription WebSocket connections on Device A are closed
+      And no confirmation prompt or "continue here?" choice is shown on either device — the termination is silent and unconditional
+      And a FHIR AuditEvent records the termination, which device initiated the new login, and when
+    status: active
+  - id: AC-17
+    title: 'Device A discovers its session was ended by a login elsewhere'
+    description: |
+      Given my session on Device A was terminated because I logged in on Device B
+      When Device A next attempts any authenticated action, or its access token expires
+      Then Device A is signed out and I see "You were signed out because your account was signed in elsewhere. Please sign in again."
+      And any in-progress documentation on Device A is preserved locally exactly as in the auto-logoff-during-an-active-encounter scenario, and after re-authentication I am returned to it with my draft intact
+    status: active
+
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+technical_notes: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+edge_cases: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+implementation_status: null

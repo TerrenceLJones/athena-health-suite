@@ -1,0 +1,62 @@
+epic_id: EPIC-AF-002
+title: 'Field Forms, Capture & Sync'
+app: athena-field
+feature_area: 'Forms, Capture & Sync'
+status: DRAFT
+approved_date: null
+created_date: '2026-07-06'
+
+source_reference:
+  - 'docs/reference/athena-health-suite-plan.md §7 App 2 — Athena Field (React Native Offline Field App) — Core features 2, 4, 6 (FHIR QuestionnaireResponse forms, Clinical photo capture, Sync status UI)'
+  - 'docs/reference/athena-health-suite-plan.md §8 User Stories & Acceptance Criteria — Story 6 (QuestionnaireResponse form, Athena Field)'
+  - 'docs/reference/athena-user-stories-gherkin.md §13 QuestionnaireResponse Forms (Athena Field)'
+  - 'docs/reference/athena-user-stories-gherkin.md §14 Clinical Photo Capture (Athena Field)'
+  - 'docs/reference/athena-user-stories-gherkin.md §15 Sync Status & Push Notifications (Athena Field)'
+
+package_location:
+  - apps/athena-field/
+  - libs/offline/
+
+deployment_unit: 'apps/athena-field (EAS)'
+
+adr_reference: []
+
+depends_on_epics:
+  - EPIC-AF-001
+
+extends_stories: []
+
+reuses_from: []
+
+has_ui: true
+
+changes:
+  adds:
+    - story_id: US-AF-004
+      story_path: specs/user-stories/athena-health-suite/US-AF-004.yaml
+      title: 'FHIR QuestionnaireResponse Clinical Forms'
+    - story_id: US-AF-005
+      story_path: specs/user-stories/athena-health-suite/US-AF-005.yaml
+      title: 'Clinical Photo Capture'
+    - story_id: US-AF-006
+      story_path: specs/user-stories/athena-health-suite/US-AF-006.yaml
+      title: 'Sync Status Visibility & Push Notifications'
+  updates: []
+  deprecates: []
+  removes: []
+
+notes: |
+  Groups the field-clinician-facing capture surfaces that produce outbox entries —
+  server-pushed FHIR Questionnaire forms with enableWhen conditional logic, wound
+  photo capture with mandatory EXIF/GPS stripping and blur/glare quality checks, and
+  the sync-status visibility layer (per-record badges, global SyncStatusBar, push
+  notifications that always re-fetch rather than trust stale payloads) that lets a
+  clinician see what state their captured data is actually in. These three are kept
+  together because they are all downstream producers/consumers of the outbox and
+  sync engine EPIC-AF-001 establishes, rather than being part of that engine itself.
+
+  Depends on EPIC-AF-001 because every form submission and photo capture writes into
+  the local WatermelonDB and outbox, and every sync-status indicator reads the state
+  that engine produces — none of this epic's stories can exist without the offline
+  core already in place. No numbered ADR in the plan addresses forms, photo capture,
+  or sync-status UI specifically.

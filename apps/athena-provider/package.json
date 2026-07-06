@@ -1,0 +1,11 @@
+{
+  "name": "athena-provider",
+  "version": "0.0.1",
+  "private": true,
+  "nx": {
+    "tags": [
+      "scope:provider",
+      "type:app"
+    ]
+  }
+}

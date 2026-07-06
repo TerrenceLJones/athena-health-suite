@@ -1,0 +1,64 @@
+id: US-SH-005
+app: shared
+feature_area: 'design-system'
+title: 'Icon Registry Component'
+status: DRAFT
+dependencies:
+  - US-SH-004
+created_by_epic: EPIC-SH-000
+created_date: '2026-07-06'
+history: []
+
+user_story:
+  persona: |
+    A frontend engineer on either Athena Provider or Athena Field who needs a status, navigation, or clinical icon in a component
+  capability: |
+    reference any icon by a stable name (e.g. `<ath-icon name="check">` on the web, an equivalent `Icon` component on native) rather than importing raw SVG paths, drawn from one registry — athena-icons.js — with one shared stroke width and currentColor theming
+  business_value: |
+    Hand-copied or re-drawn SVGs are how stroke weight and glyph meaning drift apart between the two apps; resolving every icon reference through one named registry means a stroke-width change or a new glyph is a single-file edit, and html.to.design imports land as labelled, stable components in Figma instead of anonymous path data.
+  description: |
+    Covers the ICONS registry itself (marks, status primitives, time/security, sync/data, capture, severity, and navigation/utility glyphs, each drawn on a shared 16×16 grid), the ALIAS table for backward- and alternate-name resolution, the `<ath-icon>` web component (rendered into a shadow root so injected SVG never conflicts with an outer React reconciler), and the equivalent React `Icon` wrapper — both resolving name → SVG through the same `svg()` function so the two apps and Figma stay pixel-identical.
+
+acceptance_criteria:
+  - id: AC-01
+    title: 'Every registered icon resolves by name in both rendering surfaces'
+    description: |
+      Given an icon name present in athena-icons.js's ICONS map
+      When it is referenced via the `<ath-icon>` web component or the React `Icon` component
+      Then both render identical markup for that name
+    status: active
+  - id: AC-02
+    title: 'All icons share one stroke width and inherit currentColor'
+    description: |
+      Given any icon is rendered anywhere in either app
+      When its container's text color or theme changes
+      Then the icon re-colors with it, using the shared default stroke width (1.6) with no component-local override
+    status: active
+  - id: AC-03
+    title: 'Severity icons are distinguishable with hue removed'
+    description: |
+      Given the three severity icons (sev-critical, sev-advisory, sev-info)
+      When color is removed (the grayscale test)
+      Then they remain visually distinct by shape — octagon, triangle, and outlined circle respectively — satisfying the never-color-alone invariant
+    status: active
+  - id: AC-04
+    title: 'Alternate names resolve to their canonical icon'
+    description: |
+      Given a name present only in the ALIAS table (e.g. "warning", "critical", "retry")
+      When it is referenced
+      Then it resolves to the same rendered icon as its canonical name (e.g. "triangle-filled", "circle-filled", "refresh")
+    status: active
+  - id: AC-05
+    title: 'Icon names import into Figma as labelled components'
+    description: |
+      Given the icon registry is used to build a screen referenced by html.to.design
+      When that screen is imported into Figma
+      Then each icon lands as a labelled component named after its registry name, not as anonymous path data
+    status: active
+
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+technical_notes: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+edge_cases: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+implementation_status: null

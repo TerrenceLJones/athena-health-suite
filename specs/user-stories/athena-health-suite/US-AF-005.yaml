@@ -1,0 +1,98 @@
+id: US-AF-005
+app: athena-field
+feature_area: 'Clinical Photo Capture'
+title: 'Clinical Photo Capture'
+status: DRAFT
+dependencies:
+  - US-AF-002
+created_by_epic: EPIC-AF-002
+created_date: '2026-07-06'
+history: []
+
+user_story:
+  persona: |
+    A field clinician photographing a wound for clinical documentation during a home visit
+  capability: |
+    capture a wound photo that is stripped of GPS and other identifying EXIF metadata before it ever touches local storage, checked client-side for blur and glare with the option to proceed anyway if the photo is still usable, and safely queued and retried if it fails to sync
+  business_value: |
+    A wound photo with embedded GPS coordinates in its EXIF data is a PHI leak the moment it leaves the device by any channel other than the app's own upload path; stripping it programmatically before save (never relying on the clinician to disable location services) closes that leak by construction rather than by policy.
+  description: |
+    Covers capturing a photo to the local encrypted store with all EXIF metadata (GPS, device serial, timestamp-linked location data) stripped before storage and queued to the outbox as PENDING, camera-permission-denied handling with a Settings deep link that resumes the capture flow immediately once permission is granted, per-record retry on sync failure without ever losing the photo from local storage, a pre-upload file-size check with retake guidance, programmatic verification that no GPS data survives into the stored file regardless of device location settings, and client-side blur/glare quality checks that offer retake or an explicit "use anyway" path which queues the original capture with a qualityWarning flag rather than discarding it.
+
+acceptance_criteria:
+  - id: AC-01
+    title: 'Successful photo capture while offline'
+    description: |
+      Given I am documenting a home visit and the camera permission is granted
+      When I capture a wound photo
+      Then the photo is saved to the local encrypted store
+      And all EXIF metadata (GPS coordinates, device serial, timestamp-linked location data) is stripped from the photo before local storage
+      And the photo is queued in the outbox with status PENDING
+    status: active
+  - id: AC-02
+    title: 'Camera permission denied'
+    description: |
+      Given the app does not have camera permission
+      When I tap "Capture photo"
+      Then a dialog appears: "Allow camera access in Settings to capture wound photos."
+      And a deep link to the system Settings page is shown
+      And the app never crashes or shows a blank screen — it always explains what action is needed
+    status: active
+  - id: AC-03
+    title: 'Camera permission denied — Settings deep link'
+    description: |
+      Given the camera-permission dialog is showing
+      When I tap "Open Settings"
+      Then the device's Settings app opens to the app's permissions page
+      And when I return to Athena Field with camera permission now granted, the capture flow is available immediately
+    status: active
+  - id: AC-04
+    title: 'Photo upload fails on sync'
+    description: |
+      Given one or more photos are in the PENDING outbox
+      When the sync push fails for a photo
+      Then the photo remains in the local store with status FAILED
+      And I see a per-record retry option
+      And the photo is never lost from local storage on a sync failure
+    status: active
+  - id: AC-05
+    title: 'Attachment too large'
+    description: |
+      Given I attempt to attach a photo exceeding the maximum file size
+      When the file is selected or captured
+      Then I see "This file is too large. Max size is [X] MB." before any upload is attempted
+      And guidance is offered to retake at lower resolution
+    status: active
+  - id: AC-06
+    title: 'GPS stripping verified'
+    description: |
+      Given a photo is captured with location services active on the device
+      When the photo is saved to the local store
+      Then no GPS coordinates are present in the stored file's EXIF metadata
+      And this is enforced programmatically before save — it never relies on the clinician to disable location in Settings
+    status: active
+  - id: AC-07
+    title: 'Photo fails a client-side blur check'
+    description: |
+      Given I am capturing a wound photo
+      And the captured image fails a client-side blur-detection check
+      When the capture completes
+      Then I see "This photo looks blurry — hold the camera steady and retake" with "Retake" and "Use this photo anyway" actions
+      And choosing "Use this photo anyway" queues the original capture to the outbox with a qualityWarning: blurry flag attached, rather than discarding it
+    status: active
+  - id: AC-08
+    title: 'Photo fails a client-side glare check'
+    description: |
+      Given I am capturing a wound photo
+      And the captured image fails a client-side glare-detection check (e.g. a reflective light source washing out the wound site)
+      When the capture completes
+      Then I see "This photo has glare — reposition to avoid reflections and retake" with "Retake" and "Use this photo anyway" actions
+      And choosing "Use this photo anyway" queues the original capture to the outbox with a qualityWarning: glare flag attached, rather than discarding it
+    status: active
+
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+technical_notes: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+edge_cases: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+implementation_status: null

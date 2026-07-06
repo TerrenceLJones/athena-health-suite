@@ -1,0 +1,121 @@
+id: US-AP-006
+app: athena-provider
+feature_area: 'CDS Hooks Alert System'
+title: 'CDS Hooks Tiered Alerts & Override Tracking'
+status: DRAFT
+dependencies:
+  - US-AP-005
+created_by_epic: EPIC-AP-003
+created_date: '2026-07-06'
+history: []
+
+user_story:
+  persona: |
+    A clinician viewing a patient chart who receives clinical decision support alerts
+  capability: |
+    receive CDS Hooks alerts tiered by severity — Critical alerts that require an acknowledgment or reasoned override, Advisory alerts that inform without blocking, and Informational cards tucked into a collapsible panel — without the CDS service ever blocking my clinical workflow
+  business_value: |
+    Undifferentiated alerting is the documented cause of 49–96% override rates and alert fatigue across CDS implementations; tiering severity and requiring a reason for Critical overrides (captured to a feedback endpoint and tracked as an override-rate metric) makes alerts a measured product surface instead of noise clinicians learn to dismiss reflexively.
+  description: |
+    Covers the patient-view hook firing on chart open with a 500ms non-blocking response deadline, the three card-severity renderings (Critical as a focus-trapped, non-Escape-dismissible modal requiring acknowledgment or a reasoned override; Advisory as non-blocking inline; Informational in a dismissible collapsible panel), required-reason override capture sent to the CDS Hooks feedback endpoint and counted against the alert's override rate, suggestion-acceptance that modifies only the EHR scratchpad until the clinician explicitly saves, CDS service timeout and malformed-response handling (both distinct from "no alerts" and both contained by a CdsBoundary error boundary), the override-rate-threshold administrator indicator, and the invariant that a card without source attribution is still rendered with "Source unspecified" rather than suppressed.
+
+acceptance_criteria:
+  - id: AC-01
+    title: 'patient-view hook fires on chart open'
+    description: |
+      Given I open a patient chart
+      When the patient-view hook triggers
+      Then a CDS service request is sent with the context and any configured prefetch data
+      And cards returned by the service are rendered within 500ms
+      And clinical workflow is never blocked waiting for the CDS response
+    status: active
+  - id: AC-02
+    title: 'Critical card displayed and requires acknowledgment'
+    description: |
+      Given a CDS service returns a card with indicator "critical"
+      When the card is received
+      Then a focus-trapped modal opens with the AlertCard showing: icon + "Critical" text + red styling + summary + detail + source attribution
+      And the modal cannot be dismissed without clicking "Acknowledge" or "Override with reason"
+      And pressing Escape does not dismiss the modal
+      And the clinical workflow is paused until the clinician acts
+    status: active
+  - id: AC-03
+    title: 'Advisory card displayed as non-blocking inline'
+    description: |
+      Given a CDS service returns a card with indicator "warning"
+      When the card is received
+      Then the AlertCard is shown inline in the chart without blocking any interaction
+      And it shows: amber icon + "Advisory" text + amber styling + summary + action options
+      And the clinician can continue charting without acting on it immediately
+    status: active
+  - id: AC-04
+    title: 'Informational card displayed in collapsible panel'
+    description: |
+      Given a CDS service returns a card with indicator "info"
+      When the card is received
+      Then the AlertCard appears in a collapsible "Clinical Guidance" panel at the bottom of the chart
+      And it is dismissible without any reason required
+    status: active
+  - id: AC-05
+    title: 'Clinician overrides a Critical card'
+    description: |
+      Given a Critical alert modal is open
+      When the clinician clicks "Override"
+      Then a reason selector is required before the override is accepted
+      And "Override with no reason" is never permitted for Critical cards
+      And after a reason is selected and confirmed, the modal closes
+      And the override reason + clinician ID + alert ID + timestamp are sent to the CDS Hooks feedback endpoint
+      And the override is counted against the override rate for this alert type
+    status: active
+  - id: AC-06
+    title: 'Clinician accepts a CDS suggestion'
+    description: |
+      Given a CDS card includes a suggestion (e.g., add a medication order)
+      When the clinician clicks "Accept suggestion"
+      Then the suggested FHIR action modifies only the EHR scratchpad (draft state)
+      And the FHIR server is not written to until the clinician explicitly saves or signs
+      And I see a banner: "Suggestion added to chart — not yet saved. Review and save to confirm."
+    status: active
+  - id: AC-07
+    title: 'CDS service times out'
+    description: |
+      Given the configured CDS response deadline is 500ms
+      When the CDS service has not responded after 500ms
+      Then the clinical workflow continues unblocked
+      And a non-blocking "Decision support unavailable" indicator appears in the alert panel
+      And any prefetch data that did arrive is shown if available
+      And the alert state never shows "no alerts" when the service merely timed out — these are different states
+    status: active
+  - id: AC-08
+    title: 'CDS service returns a malformed response'
+    description: |
+      Given the CDS service returns a response that fails to parse
+      When this is detected
+      Then the CdsBoundary error boundary contains the failure
+      And I see "Decision support unavailable" with a retry option
+      And no part of the malformed response is rendered or acted upon
+    status: active
+  - id: AC-09
+    title: 'Override rate threshold exceeded for an alert type'
+    description: |
+      Given the override rate for a specific Critical alert has exceeded the configured threshold (e.g., 80%)
+      When an administrator views the alert-fatigue dashboard
+      Then a "High override rate" indicator is shown for that alert
+      And the rate is calculated from the captured override feedback, not estimated
+      And this indicator is meant to prompt a clinical review of whether the alert is appropriate, not to silently suppress it
+    status: active
+  - id: AC-10
+    title: 'Alert with no source attribution'
+    description: |
+      Given a CDS card arrives without a source field
+      When it is rendered
+      Then the card displays "Source unspecified" rather than blank
+      And the card is still rendered — absence of source attribution is not a reason to suppress a clinical alert
+    status: active
+
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+technical_notes: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+edge_cases: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+implementation_status: null

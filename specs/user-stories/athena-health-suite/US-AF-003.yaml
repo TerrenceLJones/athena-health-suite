@@ -1,0 +1,87 @@
+id: US-AF-003
+app: athena-field
+feature_area: 'Clinical Conflict Resolution'
+title: 'Clinical Conflict Resolution'
+status: DRAFT
+dependencies:
+  - US-AF-002
+created_by_epic: EPIC-AF-001
+created_date: '2026-07-06'
+history: []
+
+user_story:
+  persona: |
+    A field clinician syncing offline documentation that another clinician also modified
+  capability: |
+    have any sync conflict on a clinical value surfaced to a human with full provenance for both versions and resolved only by an explicit choice — never silently overwritten by whichever write happened to land last
+  business_value: |
+    Last-write-wins is unsafe for clinical data: if two clinicians recorded different blood pressure readings for the same patient, silently picking one is a patient-safety event, not a merge conflict. Human-mediated resolution with full provenance (who, when, which device) keeps a clinician in the loop for every clinical discrepancy while still allowing safe automatic merging of non-clinical metadata.
+  description: |
+    Covers conflict detection when both a local and a server value for the same clinical field changed since the last pull, the ConflictResolutionDialog showing both versions with recorder identity, timestamp, and device, resolution by selecting one of the two existing values or by entering a new value with an explanatory note (both paths write a FHIR AuditEvent recording which version was chosen, by whom, and that a conflict existed), sequential resolution of multiple conflicts after a long offline period with no conflict silently skipped, the distinction between clinical fields (always human-mediated) and non-clinical metadata fields (field-level merge permitted, no dialog shown), and the invariant that the dialog cannot be dismissed without an explicit resolution.
+
+acceptance_criteria:
+  - id: AC-01
+    title: 'Sync conflict detected on a clinical value'
+    description: |
+      Given I documented a patient's systolic BP as 128 mmHg while offline
+      And during my offline period, another clinician recorded the same patient's systolic BP as 145 mmHg from a different device
+      When I return online and the sync engine pushes my changes
+      Then the server detects the conflict (both values modified since the lastPulledAt baseline)
+      And a ConflictResolutionDialog opens showing:
+        - My value: "128 mmHg — recorded by [my name], [my timestamp], [my device]"
+        - Server value: "145 mmHg — recorded by [other clinician's name], [their timestamp], [their device]"
+      And no automatic resolution is applied — a human must choose
+      And this is treated as a Patient-Safety-Critical scenario: silent overwrites of clinical values are a patient safety event
+    status: active
+  - id: AC-02
+    title: 'Clinician resolves a conflict by choosing one version'
+    description: |
+      Given the ConflictResolutionDialog is open with two conflicting values
+      When I select "Use my value (128 mmHg)" and confirm
+      Then my value is written back to WatermelonDB as the resolved value
+      And the resolved value is queued for re-sync with the server
+      And a FHIR AuditEvent records: which version was chosen, by whom, at what time, and that a conflict existed
+    status: active
+  - id: AC-03
+    title: 'Clinician resolves a conflict by editing a new value'
+    description: |
+      Given the ConflictResolutionDialog is open
+      When I select "Enter a different value" and enter 132 mmHg with a note
+      Then 132 mmHg is set as the resolved value with the note as a comment
+      And this new value is queued for sync
+      And the audit event records the manually entered resolution
+    status: active
+  - id: AC-04
+    title: 'Multiple conflicts exist after a long offline period'
+    description: |
+      Given 5 clinical fields have sync conflicts after reconnection
+      When the sync engine processes the push
+      Then ConflictResolutionDialog is opened sequentially for each conflict
+      And I must resolve all 5 before the sync is considered complete
+      And no conflicts are silently skipped or auto-resolved
+    status: active
+  - id: AC-05
+    title: 'Conflict on a non-clinical metadata field'
+    description: |
+      Given a conflict exists on a non-clinical metadata field (e.g., note formatting preference)
+      When this is detected
+      Then field-level merge is applied automatically (last-write-wins is acceptable for non-clinical metadata)
+      And no ConflictResolutionDialog is shown for this field
+      And the system distinguishes between clinical data (always human-mediated) and metadata (field-level merge permitted)
+    status: active
+  - id: AC-06
+    title: 'Conflict resolution dialog dismissed without a choice'
+    description: |
+      Given the ConflictResolutionDialog is open
+      When the clinician tries to dismiss it by pressing the device back button or tapping outside
+      Then the dialog remains open
+      And I see "This conflict must be resolved before syncing can continue."
+      And the conflict is never silently abandoned
+    status: active
+
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+technical_notes: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+edge_cases: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+implementation_status: null

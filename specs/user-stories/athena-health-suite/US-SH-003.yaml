@@ -1,0 +1,100 @@
+id: US-SH-003
+app: shared
+feature_area: 'Audit Logging'
+title: 'FHIR AuditEvent Logging for PHI Access & Clinical Actions'
+status: DRAFT
+dependencies:
+  - US-AP-005
+  - US-AF-003
+created_by_epic: EPIC-SH-001
+created_date: '2026-07-06'
+history: []
+
+user_story:
+  persona: |
+    A compliance officer or auditor who needs to reconstruct exactly who accessed or acted on PHI, and when, across both apps
+  capability: |
+    have every PHI view, AI note sign-off, CDS override, sync-conflict resolution, PHI reveal, and remote wipe write an immutable FHIR AuditEvent — including auditing access to the audit log itself — so that no PHI-touching action in either app happens without a durable, tamper-proof record
+  business_value: |
+    An audit trail that can be edited or deleted after the fact is not an audit trail; writing every event as an immutable, create-only FHIR AuditEvent on the server (never a local-only log) is what actually satisfies the HIPAA accounting-of-disclosures requirement and gives a compliance investigation a record it can trust.
+  description: |
+    Covers AuditEvent generation for every chart view (agent, entity, type, outcome, recorded), every vital-signs panel view, AI note sign-off (recording that AI assistance was used and that review was completed), CDS Critical-alert override (reason, clinician, alert type), Athena Field clinical conflict resolution (both conflicting values, who resolved it, which was chosen), PHIMaskedField reveal actions, and remote-wipe execution (to the extent the device can still reach the server) — plus the two structural invariants that make the trail trustworthy: AuditEvents may only be created, never updated or deleted (rejected with 405/403 on any attempt), and viewing the audit log is itself an audited action, so no one can review the audit trail from outside the system undetected.
+
+acceptance_criteria:
+  - id: AC-01
+    title: 'Every chart view generates an AuditEvent'
+    description: |
+      Given any clinician opens a patient chart in Athena Provider
+      When the chart renders
+      Then a FHIR AuditEvent is written to the server containing:
+        - agent: the clinician's Practitioner resource reference
+        - entity: the Patient resource reference
+        - type: "read"
+        - outcome: "success"
+        - recorded: the current timestamp
+    status: active
+  - id: AC-02
+    title: 'Every vital-signs view generates an AuditEvent'
+    description: |
+      Given a clinician views the real-time vitals panel
+      When the panel loads
+      Then a FHIR AuditEvent is written with the Observation category and patient reference
+    status: active
+  - id: AC-03
+    title: 'AI note sign-off generates an AuditEvent'
+    description: |
+      Given a clinician signs an AI-assisted clinical note
+      When signing completes
+      Then a FHIR AuditEvent is written recording: clinician ID, patient ID, document ID, timestamp, the fact that AI assistance was used, and confirmation that the clinician completed the required review
+    status: active
+  - id: AC-04
+    title: 'CDS alert override generates an AuditEvent'
+    description: |
+      Given a clinician overrides a Critical CDS alert with a reason
+      When the override is confirmed
+      Then a FHIR AuditEvent records: clinician ID, alert type, override reason, and timestamp
+    status: active
+  - id: AC-05
+    title: 'Clinical conflict resolution generates an AuditEvent'
+    description: |
+      Given a clinician resolves a sync conflict in Athena Field
+      When the resolution is submitted
+      Then a FHIR AuditEvent records: which clinician resolved it, which value was chosen, both conflicting values (local and server), and the timestamp
+    status: active
+  - id: AC-06
+    title: 'PHI reveal in PHIMaskedField generates an AuditEvent'
+    description: |
+      Given a PHIMaskedField is displaying a masked PHI value
+      When the clinician explicitly reveals the value by tapping/clicking the reveal action
+      Then a FHIR AuditEvent records: the clinician, the patient, the field type revealed, and the timestamp
+    status: active
+  - id: AC-07
+    title: 'Remote wipe generates an AuditEvent'
+    description: |
+      Given a remote-wipe flag is processed by Athena Field
+      When the wipe executes
+      Then a FHIR AuditEvent is written (to the extent the device can reach the server) recording the wipe event, the device identifier, and the timestamp
+    status: active
+  - id: AC-08
+    title: 'Audit log is immutable'
+    description: |
+      Given any FHIR AuditEvent has been written
+      When any user (including clinicians or administrators) attempts to modify or delete it
+      Then the action is rejected with a 405 Method Not Allowed or 403 Forbidden
+      And FHIR AuditEvents may only be created — never updated or deleted
+    status: active
+  - id: AC-09
+    title: 'Viewing the audit log is itself logged'
+    description: |
+      Given an administrator accesses the audit log view
+      When they open it
+      Then a FHIR AuditEvent records the access to the audit log itself (who, when, what date range was queried)
+      And this prevents undetected audit log review from outside the system
+    status: active
+
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+technical_notes: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+edge_cases: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+implementation_status: null

@@ -1,0 +1,152 @@
+id: US-AP-004
+app: athena-provider
+feature_area: 'Real-Time Vitals Dashboard'
+title: 'Real-Time Vitals Dashboard'
+status: DRAFT
+dependencies:
+  - US-AP-002
+created_by_epic: EPIC-AP-002
+created_date: '2026-07-06'
+history: []
+
+user_story:
+  persona: |
+    A clinician with a resolved SMART session monitoring a patient's real-time vital signs
+  capability: |
+    see live vital-sign values that clearly and continuously communicate how current they are — live, stale, degraded, or disconnected — and never mistake absent or outdated data for a normal current reading
+  business_value: |
+    Prevents the single most dangerous failure mode of a real-time monitoring dashboard: a clinician acting on a vital sign that looks current but isn't. Explicit staleness tiers (5s/30s/2min), hard invariants against showing "0" or blank for absent values, and filtering of entered-in-error observations make the freshness and validity of every displayed number unambiguous.
+  description: |
+    Covers the VitalTile's live update behavior over a FHIR Subscription WebSocket, its staleness lifecycle (live → stale at 5s → degraded banner at 30s → fully hidden at 2min, since a clinician must never mistake absent data for a normal reading), reconnection behavior that only restores values once fresh data is confirmed, correct handling of every Observation status the Subscription can deliver (final, entered-in-error struck-through and never actionable, preliminary marked "Unconfirmed", unrecognized statuses flagged for review), sequence-gap resync handling, the absent-value hard invariant (never "0", "normal", or a blank that implies in-range), and accessible presentation (aria-label reflecting actual values, freshness conveyed by text and icon not color alone, isolated by a VitalsBoundary error boundary).
+
+acceptance_criteria:
+  - id: AC-01
+    title: 'New vital-signs Observation arrives with "final" status'
+    description: |
+      Given I am a clinician with a SMART session containing patient context
+      And I am viewing the real-time vitals dashboard for a patient
+      Given the FHIR Subscription WebSocket is connected
+      When an Observation arrives with status "final", a LOINC code, a UCUM unit, and a timestamp
+      Then the VitalTile updates within approximately 1 second
+      And a live pulsing badge is visible
+      And the value, unit, LOINC code, and "last updated {time}" timestamp are all shown
+      And a FHIR AuditEvent records that the clinician viewed this vital
+    status: active
+  - id: AC-02
+    title: 'VitalTile goes stale after 5 seconds without an update'
+    description: |
+      Given I am a clinician with a SMART session containing patient context
+      And I am viewing the real-time vitals dashboard for a patient
+      Given a VitalTile is displaying a live vital
+      When 5 seconds pass without a new Subscription event for that vital
+      Then the VitalTile transitions to "stale" state
+      And the pulsing live badge is replaced with a static grey badge
+      And "Last updated {time}" is shown
+      And the vital value remains visible but is not implied to be current
+    status: active
+  - id: AC-03
+    title: 'Vitals feed degraded after 30 seconds'
+    description: |
+      Given I am a clinician with a SMART session containing patient context
+      And I am viewing the real-time vitals dashboard for a patient
+      Given 30 seconds have passed since the last Subscription event
+      When this threshold is crossed
+      Then a persistent banner appears: "Vitals feed delayed — reconnecting…"
+      And all VitalTile values are visually dimmed with timestamps
+      And the client attempts reconnection with exponential backoff
+    status: active
+  - id: AC-04
+    title: 'Vitals feed disconnected after 2 minutes'
+    description: |
+      Given I am a clinician with a SMART session containing patient context
+      And I am viewing the real-time vitals dashboard for a patient
+      Given 2 minutes have passed with no Subscription heartbeat
+      When this threshold is crossed
+      Then all vital values are hidden behind "No current data available"
+      And any threshold alert actions that depend on live vitals are disabled
+      And I see a "Monitor manually — alert system unavailable" warning
+      And this is treated as a Patient-Safety-Critical state — a clinician must never mistake absent data for a normal reading
+    status: active
+  - id: AC-05
+    title: 'WebSocket reconnects after disconnection'
+    description: |
+      Given I am a clinician with a SMART session containing patient context
+      And I am viewing the real-time vitals dashboard for a patient
+      Given the vitals feed was disconnected
+      When the WebSocket reconnects
+      Then a fresh Subscription is established
+      And VitalTile values are only restored once fresh data is confirmed
+      And the staleness badges clear only after a fresh event is received — not at the moment of reconnect
+    status: active
+  - id: AC-06
+    title: '"entered-in-error" Observation arrives'
+    description: |
+      Given I am a clinician with a SMART session containing patient context
+      And I am viewing the real-time vitals dashboard for a patient
+      Given the Subscription delivers an Observation with status "entered-in-error"
+      When this is received
+      Then if the value was previously displayed, it is immediately struck-through with the label "Entered in error"
+      And it is filtered from all clinical lists and alert pipelines
+      And it is never actionable or alertable in any form
+      And this is treated as a Patient-Safety-Critical invariant: displaying an entered-in-error value as valid clinical data is a safety event
+    status: active
+  - id: AC-07
+    title: '"preliminary" Observation arrives'
+    description: |
+      Given I am a clinician with a SMART session containing patient context
+      And I am viewing the real-time vitals dashboard for a patient
+      Given the Subscription delivers an Observation with status "preliminary"
+      When this is displayed
+      Then a blue "Unconfirmed" badge is shown alongside the value
+      And the value is never styled or labeled as a final result
+      And alert thresholds treat preliminary values with reduced confidence (configurable)
+    status: active
+  - id: AC-08
+    title: 'Unknown Observation status received'
+    description: |
+      Given I am a clinician with a SMART session containing patient context
+      And I am viewing the real-time vitals dashboard for a patient
+      Given the Subscription delivers an Observation with a status code the client does not recognize
+      When this is displayed
+      Then the value shows "Unrecognized status — review in source system"
+      And it is treated as preliminary (not final) for all threshold and alert purposes
+    status: active
+  - id: AC-09
+    title: 'Sequence gap in Subscription event numbers'
+    description: |
+      Given I am a clinician with a SMART session containing patient context
+      And I am viewing the real-time vitals dashboard for a patient
+      Given the client is tracking SubscriptionStatus event numbers
+      When a gap is detected in the sequence
+      Then the client re-fetches missed events via the Subscription $events endpoint or re-subscribes
+      And during the re-fetch period, affected VitalTiles show "Resyncing…"
+      And no stale or speculative values are shown as current during resync
+    status: active
+  - id: AC-10
+    title: 'Vital value is absent (not recorded)'
+    description: |
+      Given I am a clinician with a SMART session containing patient context
+      And I am viewing the real-time vitals dashboard for a patient
+      Given a VitalTile is expecting a value that has not been recorded
+      When the tile renders
+      Then it shows "—" (em dash) — never "0", "normal", or an empty field that implies in-range
+      And this is a hard invariant: absent ≠ zero ≠ in-range
+    status: active
+  - id: AC-11
+    title: 'VitalTile is accessible'
+    description: |
+      Given I am a clinician with a SMART session containing patient context
+      And I am viewing the real-time vitals dashboard for a patient
+      Given a screen reader user is viewing the vitals dashboard
+      When a VitalTile renders
+      Then its aria-label is "Systolic BP: 128 mmHg, final, updated 2 minutes ago" (reflecting the actual values)
+      And freshness state is conveyed by text and icon, never by color alone
+      And the VitalsBoundary error boundary isolates any VitalTile crash from the rest of the chart
+    status: active
+
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+technical_notes: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+edge_cases: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+implementation_status: null

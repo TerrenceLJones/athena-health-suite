@@ -1,0 +1,73 @@
+id: US-AP-009
+app: athena-provider
+feature_area: 'Encounter Lifecycle'
+title: 'Encounter Lifecycle State Machine'
+status: DRAFT
+dependencies:
+  - US-AP-002
+created_by_epic: EPIC-AP-002
+created_date: '2026-07-06'
+history: []
+
+user_story:
+  persona: |
+    A clinician moving a patient encounter through its lifecycle from arrival to closure
+  capability: |
+    have the Encounter's status (planned, arrived, in-progress, finished, cancelled) modeled as an explicit state machine so that documentation panels unlock and lock at the right points and no illegal transition (e.g., re-opening a finished encounter) is ever representable
+  business_value: |
+    Boolean-flag encounter status is a common source of impossible states (e.g., an encounter that is simultaneously "finished" and editable); an XState machine with a fixed transition table eliminates that class of bug entirely and gives every downstream panel (vitals, notes, forms) a single source of truth for whether it should be editable.
+  description: |
+    Covers the four forward transitions — planned to arrived (unlocking vitals/notes/forms), arrived to in-progress (starting the encounter timer), in-progress to finished (requires a signed note, closes editability without an amendment, and writes a FHIR AuditEvent), and planned-or-arrived to cancelled (preserving any in-progress documentation as a draft rather than discarding it) — plus the invariant that the state machine rejects any attempted illegal transition, such as moving directly from "finished" back to "in-progress".
+
+acceptance_criteria:
+  - id: AC-01
+    title: 'Encounter transitions from planned to arrived'
+    description: |
+      Given an Encounter resource exists with status "planned"
+      When the clinician confirms the patient has arrived
+      Then the Encounter status updates to "arrived"
+      And the timestamp is recorded
+      And downstream panels (vitals, notes, forms) become editable
+    status: active
+  - id: AC-02
+    title: 'Encounter transitions to in-progress'
+    description: |
+      Given an Encounter is in "arrived" status
+      When the clinician begins the clinical assessment
+      Then the Encounter status updates to "in-progress"
+      And the encounter timer starts
+    status: active
+  - id: AC-03
+    title: 'Encounter finishes — note signed and encounter closed'
+    description: |
+      Given an Encounter is in "in-progress" status
+      And the clinician has signed the encounter note
+      When the clinician closes the encounter
+      Then the Encounter status updates to "finished"
+      And the encounter is no longer editable without an amendment
+      And a FHIR AuditEvent records the closure
+    status: active
+  - id: AC-04
+    title: 'Encounter cancelled'
+    description: |
+      Given an Encounter is "planned" or "arrived"
+      When the encounter is cancelled with a reason
+      Then the Encounter status updates to "cancelled"
+      And any in-progress documentation is preserved as a draft (not discarded)
+      And the reason for cancellation is recorded
+    status: active
+  - id: AC-05
+    title: 'Attempt to transition to an illegal state'
+    description: |
+      Given the XState encounter machine is in "finished" state
+      When any action attempts to transition back to "in-progress" directly
+      Then the transition is rejected by the state machine
+      And no illegal state is representable — this is a core benefit of XState over boolean flags
+    status: active
+
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+technical_notes: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+edge_cases: null
+# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
+implementation_status: null
