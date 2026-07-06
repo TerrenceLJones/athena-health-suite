@@ -31,7 +31,8 @@ depends_on_epics:
 
 extends_stories: []
 
-reuses_from: []
+reuses_from:
+  - EPIC-SH-000
 
 has_ui: true
 
@@ -52,7 +53,9 @@ changes:
     - story_id: US-AP-011
       story_path: specs/user-stories/athena-health-suite/US-AP-011.yaml
       title: 'Storybook Accessibility Gate'
-  updates: []
+  updates:
+    - field: reuses_from
+      change: "Added EPIC-SH-000 (Design Tokens & Icon Registry Foundation) — VitalTile/AlertCard render Observation staleness and severity via that epic's tokens/icons, formalized by its Severity & Status System doc (US-SH-006)."
   deprecates: []
   removes: []
 

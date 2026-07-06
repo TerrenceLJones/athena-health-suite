@@ -34,7 +34,8 @@ depends_on_epics:
 
 extends_stories: []
 
-reuses_from: []
+reuses_from:
+  - EPIC-SH-000
 
 has_ui: true
 
@@ -49,7 +50,9 @@ changes:
     - story_id: US-SH-003
       story_path: specs/user-stories/athena-health-suite/US-SH-003.yaml
       title: 'FHIR AuditEvent Logging for PHI Access & Clinical Actions'
-  updates: []
+  updates:
+    - field: reuses_from
+      change: "Added EPIC-SH-000 (Design Tokens & Icon Registry Foundation) — WCAG 2.1 AA's never-color-alone requirement (US-SH-002) is formalized by that epic's Severity & Status System doc (US-SH-006)."
   deprecates: []
   removes: []
 

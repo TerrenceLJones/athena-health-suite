@@ -1,0 +1,17 @@
+{
+  "files": [],
+  "references": [
+    {
+      "path": "./libs/ui"
+    },
+    {
+      "path": "./apps/athena-provider"
+    },
+    {
+      "path": "./libs/design-tokens"
+    },
+    {
+      "path": "./libs/icons"
+    }
+  ]
+}

@@ -26,7 +26,8 @@ depends_on_epics:
 
 extends_stories: []
 
-reuses_from: []
+reuses_from:
+  - EPIC-SH-000
 
 has_ui: true
 
@@ -41,7 +42,9 @@ changes:
     - story_id: US-AF-006
       story_path: specs/user-stories/athena-health-suite/US-AF-006.yaml
       title: 'Sync Status Visibility & Push Notifications'
-  updates: []
+  updates:
+    - field: reuses_from
+      change: "Added EPIC-SH-000 (Design Tokens & Icon Registry Foundation) — the SyncStatusBar and per-record sync badges render data-status indicators formalized by that epic's Severity & Status System doc (US-SH-006)."
   deprecates: []
   removes: []
 

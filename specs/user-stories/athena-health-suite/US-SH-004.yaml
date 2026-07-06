@@ -62,9 +62,20 @@ acceptance_criteria:
       Then editing athena-tokens.json alone is sufficient — no hand-maintained duplicate of any token value exists in libs/design-tokens/, the Provider app, the Field app, or Figma
     status: active
 
-# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
-technical_notes: null
-# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
-edge_cases: null
-# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
-implementation_status: null
+technical_notes: |
+  Implemented as libs/design-tokens (@athena/design-tokens). tokens.source.json is a
+  checked-in copy of specs/designs/athena-tokens.json; scripts/generate-tokens.mjs
+  compiles it into src/tokens.ts (typed primitive/severity/dataStatus/theme/
+  typography/spacing/radius constants) and src/theme.css (light/dark CSS custom
+  properties plus a Tailwind v4 `@theme inline` block aliasing them). Regenerate with
+  `pnpm --filter @athena/design-tokens generate` after editing
+  specs/designs/athena-tokens.json and re-copying it into tokens.source.json.
+edge_cases: |
+  - A vitest suite (source-sync.test.ts) asserts tokens.source.json is byte-identical
+    to specs/designs/athena-tokens.json, catching drift from the copy step (AC-06).
+  - tokens.test.ts / theme-css.test.ts assert the generated tokens.ts/theme.css are
+    not stale relative to what the generator would produce right now, catching a
+    forgotten regenerate after editing the source.
+implementation_status: |
+  Done. libs/design-tokens ships typed constants + theme.css; nx test/typecheck/lint
+  all green.

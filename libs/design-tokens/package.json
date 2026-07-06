@@ -1,0 +1,22 @@
+{
+  "name": "@athena/design-tokens",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Typed design tokens + light/dark theme.css, generated from tokens.source.json (a copy of specs/designs/athena-tokens.json).",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./theme.css": "./src/theme.css",
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "generate": "node scripts/generate-tokens.mjs"
+  },
+  "dependencies": {}
+}

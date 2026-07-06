@@ -57,9 +57,16 @@ acceptance_criteria:
       And each records that addition as a changes.updates entry, so the retroactive dependency is itself traceable in the registry rather than a silent edit
     status: active
 
-# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
-technical_notes: null
-# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
-edge_cases: null
-# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
-implementation_status: null
+technical_notes: |
+  Published as docs/reference/athena-severity-status-system.md, citing
+  athena-tokens.json's severity/dataStatus sections (via @athena/design-tokens) rather
+  than restating values by hand. AC-05's retroactive update was applied directly to
+  EPIC-AP-001 through EPIC-AP-004, EPIC-AF-001, EPIC-AF-002, and EPIC-SH-001 in the
+  same commit — each now lists EPIC-SH-000 in reuses_from with a matching
+  changes.updates entry recording the addition.
+edge_cases: |
+  - AC-05's retroactive epic updates were applied by hand rather than by a script,
+    since it touches seven distinct, differently-worded epic files; each was verified
+    to parse as valid YAML after editing.
+implementation_status: |
+  Done. Doc published; all seven existing epics updated to reuse EPIC-SH-000.

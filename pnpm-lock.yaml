@@ -213,33 +213,15 @@ importers:
 
   apps/athena-provider: {}
 
-  apps/athena-provider-e2e: {}
+  libs/design-tokens: {}
 
-  libs/ai: {}
-
-  libs/auth: {}
-
-  libs/clinical/cds: {}
-
-  libs/clinical/safety: {}
-
-  libs/clinical/state-machines: {}
-
-  libs/compliance: {}
-
-  libs/fhir/client: {}
-
-  libs/fhir/hooks: {}
-
-  libs/fhir/mappers: {}
-
-  libs/fhir/types: {}
-
-  libs/offline: {}
+  libs/icons:
+    dependencies:
+      react:
+        specifier: ^19.0.0
+        version: 19.2.7
 
   libs/ui: {}
-
-  libs/util: {}
 
 packages:
 
