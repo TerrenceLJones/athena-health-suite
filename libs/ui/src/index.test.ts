@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
 describe('public API (src/index.ts)', () => {
-  // Placeholder smoke test: the ui lib has no exports yet. This keeps the
-  // vitest `test` target green (vitest exits non-zero on "no test files")
-  // and will assert real exports as components land.
-  it('imports without throwing', async () => {
+  it('re-exports the applied theme surface', async () => {
     const mod = await import('./index.js');
 
-    expect(mod).toBeDefined();
+    expect(mod.themeColors.light['text-1']).toBe('#1a1f26');
+    expect(mod.themeColors.dark.bg).toBe('#0d1116');
+    expect(mod.themeVars).toContain('crit');
+    expect(mod.cssVar('accent')).toBe('var(--accent)');
   });
 });

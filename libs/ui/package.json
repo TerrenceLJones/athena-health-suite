@@ -11,7 +11,11 @@
       "import": "./src/index.ts",
       "default": "./src/index.ts"
     },
+    "./theme.css": "./src/theme/theme.css",
     "./package.json": "./package.json"
+  },
+  "scripts": {
+    "generate": "node scripts/generate-theme.mjs"
   },
   "dependencies": {}
 }
