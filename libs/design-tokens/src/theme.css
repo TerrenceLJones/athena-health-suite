@@ -1,0 +1,115 @@
+/*
+ * GENERATED FILE — do not edit by hand.
+ * Source: tokens.source.json (a copy of specs/designs/athena-tokens.json).
+ * Regenerate with: pnpm --filter @athena/design-tokens generate
+ */
+
+:root[data-theme='light'] {
+  --ath-bg: #e7eaee;
+  --ath-card: #ffffff;
+  --ath-surface: #ffffff;
+  --ath-surface-2: #f6f7f9;
+  --ath-surface-3: #eceff3;
+  --ath-border: #d8dde3;
+  --ath-border-strong: #cfd5dd;
+  --ath-text: #1a1f26;
+  --ath-text-muted: #4d5866;
+  --ath-text-subtle: #7a8493;
+  --ath-inverse: #12161c;
+  --ath-accent: #0e7c86;
+  --ath-accent-strong: #0a626b;
+  --ath-accent-soft: #e4f2f3;
+  --ath-crit-fg: #a8261f;
+  --ath-crit-tint: #fbeceb;
+  --ath-crit-line: #f0c9c6;
+  --ath-adv-fg: #9a6a08;
+  --ath-adv-tint: #fbf3e0;
+  --ath-adv-line: #edd2ab;
+  --ath-info-fg: #2765a8;
+  --ath-info-tint: #e9f1fb;
+  --ath-info-line: #bcd3fb;
+  --ath-stale-fg: #a25a08;
+  --ath-stale-tint: #fbeeda;
+  --ath-stale-line: #edd2ab;
+  --ath-live-fg: #17724a;
+  --ath-live-tint: #e6f4ec;
+  --ath-live-line: #1f8a54;
+  --ath-disc: #9aa4b1;
+  --ath-err-fg: #a8261f;
+  --ath-err-tint: #fbeceb;
+}
+
+:root[data-theme='dark'] {
+  --ath-bg: #0d1116;
+  --ath-card: #161b22;
+  --ath-surface: #161b22;
+  --ath-surface-2: #1c232c;
+  --ath-surface-3: #222c31;
+  --ath-border: #2a323d;
+  --ath-border-strong: #39434f;
+  --ath-text: #e8ecf1;
+  --ath-text-muted: #a9b3bf;
+  --ath-text-subtle: #7b8593;
+  --ath-inverse: #0d1116;
+  --ath-accent: #35b3bb;
+  --ath-accent-strong: #0e7c86;
+  --ath-accent-soft: rgba(14, 124, 134, 0.18);
+  --ath-crit-fg: #e88a84;
+  --ath-crit-tint: rgba(224, 90, 82, 0.15);
+  --ath-crit-line: #4a2a28;
+  --ath-adv-fg: #e0a13a;
+  --ath-adv-tint: rgba(216, 140, 26, 0.15);
+  --ath-adv-line: #4a3a20;
+  --ath-info-fg: #7ab3e8;
+  --ath-info-tint: rgba(90, 159, 224, 0.15);
+  --ath-info-line: #26406e;
+  --ath-stale-fg: #e79a4d;
+  --ath-stale-tint: rgba(224, 138, 58, 0.16);
+  --ath-stale-line: #4a3a20;
+  --ath-live-fg: #4fc487;
+  --ath-live-tint: rgba(53, 176, 111, 0.15);
+  --ath-live-line: #35b06f;
+  --ath-disc: #6b7684;
+  --ath-err-fg: #e88a84;
+  --ath-err-tint: rgba(224, 90, 82, 0.15);
+}
+
+@theme inline {
+  --color-bg: var(--ath-bg);
+  --color-card: var(--ath-card);
+  --color-surface: var(--ath-surface);
+  --color-surface-2: var(--ath-surface-2);
+  --color-surface-3: var(--ath-surface-3);
+  --color-border: var(--ath-border);
+  --color-border-strong: var(--ath-border-strong);
+  --color-text: var(--ath-text);
+  --color-text-muted: var(--ath-text-muted);
+  --color-text-subtle: var(--ath-text-subtle);
+  --color-inverse: var(--ath-inverse);
+  --color-accent: var(--ath-accent);
+  --color-accent-strong: var(--ath-accent-strong);
+  --color-accent-soft: var(--ath-accent-soft);
+  --color-crit-fg: var(--ath-crit-fg);
+  --color-crit-tint: var(--ath-crit-tint);
+  --color-crit-line: var(--ath-crit-line);
+  --color-adv-fg: var(--ath-adv-fg);
+  --color-adv-tint: var(--ath-adv-tint);
+  --color-adv-line: var(--ath-adv-line);
+  --color-info-fg: var(--ath-info-fg);
+  --color-info-tint: var(--ath-info-tint);
+  --color-info-line: var(--ath-info-line);
+  --color-stale-fg: var(--ath-stale-fg);
+  --color-stale-tint: var(--ath-stale-tint);
+  --color-stale-line: var(--ath-stale-line);
+  --color-live-fg: var(--ath-live-fg);
+  --color-live-tint: var(--ath-live-tint);
+  --color-live-line: var(--ath-live-line);
+  --color-disc: var(--ath-disc);
+  --color-err-fg: var(--ath-err-fg);
+  --color-err-tint: var(--ath-err-tint);
+  --radius-ath-sm: 7px;
+  --radius-ath-md: 9px;
+  --radius-ath-control: 10px;
+  --radius-ath-card: 14px;
+  --radius-ath-pill: 9999px;
+}

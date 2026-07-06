@@ -56,9 +56,30 @@ acceptance_criteria:
       Then each icon lands as a labelled component named after its registry name, not as anonymous path data
     status: active
 
-# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
-technical_notes: null
-# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
-edge_cases: null
-# Placeholder — populated by the Feature-Slice Loop when this story is implemented.
-implementation_status: null
+technical_notes: |
+  Implemented as libs/icons (@athena/icons). specs/designs/athena-icons.js is the only
+  design source (no separate machine-readable JSON, unlike athena-tokens.json) and
+  unconditionally touches HTMLElement at load time, so it can't be evaluated in a
+  plain Node context. scripts/generate-icons.mjs evaluates it once inside a minimal
+  node:vm sandbox (shimmed HTMLElement/customElements/window) purely to read off
+  ICONS/ALIAS, then writes a plain, dependency-free src/icon-registry.ts — the shipped
+  library never runs vm or needs a DOM to read icon data. The React `Icon` component
+  renders a real <svg> with individual props (viewBox/fill/stroke/strokeWidth/etc.)
+  and `dangerouslySetInnerHTML` only for the per-icon inner body markup, so it and the
+  `<ath-icon>` web component share the same glyph data. Regenerate with
+  `pnpm --filter @athena/icons generate` after editing specs/designs/athena-icons.js.
+edge_cases: |
+  - FILLED-vs-stroked icons aren't in athena-icons.js's public API export, so the
+    generator derives each icon's `filled` flag by calling the source's own svg()
+    function and checking for fill="currentColor" rather than re-typing a second
+    FILLED list by hand.
+  - vitest's happy-dom environment rewrites import.meta.url to a fake
+    http://localhost/@fs/<path> origin instead of a real file:// URL; test files that
+    need the real path strip the "@fs" marker rather than relying on fileURLToPath
+    directly.
+  - AC-05 (Figma/html.to.design labelling) has no automated test — it's a Figma-side
+    import behavior, documented as a manual/process criterion instead.
+implementation_status: |
+  Done. libs/icons ships a generated icon-registry.ts + Icon component; nx
+  test/typecheck/lint all green, including a parity suite asserting Icon and the raw
+  svg() output render identical markup for every registered name.
