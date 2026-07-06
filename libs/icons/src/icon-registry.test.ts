@@ -1,23 +1,15 @@
 import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
 import prettier from 'prettier';
 import { describe, expect, it } from 'vitest';
 import { loadAthenaIconsApi, buildIconRegistryModule } from '../scripts/generate-icons.mjs';
 import { iconRegistry, iconAliases } from './icon-registry.js';
+import { resolveTestAsset } from './test-support/resolve-test-asset.js';
 
-// Under vitest's happy-dom environment, import.meta.url is rewritten
-// relative to a fake http://localhost/@fs/<real-path> origin instead of a
-// real file:// URL — the real absolute path survives after the "@fs" marker.
-function resolveTestAsset(relativePath: string): string {
-  const resolved = new URL(relativePath, import.meta.url);
-  if (resolved.protocol === 'file:') {
-    return fileURLToPath(resolved);
-  }
-  return decodeURIComponent(resolved.pathname.replace(/^\/@fs/, ''));
-}
-
-const canonicalScriptPath = resolveTestAsset('../../../specs/designs/athena-icons.js');
-const generatedPath = resolveTestAsset('./icon-registry.ts');
+const canonicalScriptPath = resolveTestAsset(
+  '../../../specs/designs/athena-icons.js',
+  import.meta.url,
+);
+const generatedPath = resolveTestAsset('./icon-registry.ts', import.meta.url);
 
 describe('src/icon-registry.ts is not stale', () => {
   it('matches what generate-icons.mjs would produce from specs/designs/athena-icons.js', async () => {

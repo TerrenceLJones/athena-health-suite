@@ -5,3 +5,6 @@
 /.nx/workspace-data
 .nx/self-healing
 docs/reference
+
+# Generated lockfiles
+pnpm-lock.yaml

@@ -18,6 +18,7 @@
     "src/**/*.test.tsx",
     "src/**/*.spec.tsx",
     "src/**/*.d.ts",
+    "src/test-support/**/*.ts",
     "scripts/**/*.mjs"
   ],
   "references": [

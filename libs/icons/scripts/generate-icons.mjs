@@ -61,6 +61,9 @@ export function buildIconRegistryModule(api) {
 
   const entries = names
     .map((name) => {
+      // FILLED isn't in athena-icons.js's public `api` export (only ICONS,
+      // names, aliases, svg, resolve are) — derive it from svg()'s own
+      // output instead of re-typing a second fill/stroke list by hand.
       const filled = api.svg(name).includes('fill="currentColor"');
       return `  '${name}': { viewBox: '0 0 16 16', sw: 1.6, filled: ${filled}, body: ${JSON.stringify(api.ICONS[name])} },`;
     })
