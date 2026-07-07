@@ -1,22 +1,54 @@
 name: CI
 
+# Verification only — does NOT deploy. Vercel's GitHub integration handles deploys.
+
 on:
   push:
-    branches:
-      - main
+    branches: [main]
+    paths:
+      - 'apps/athena-provider/**'
+      - 'libs/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'nx.json'
+      - 'tsconfig.base.json'
   pull_request:
 
 permissions:
-  actions: read
   contents: read
+  actions: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  main:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      relevant: ${{ steps.filter.outputs.relevant }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            relevant:
+              - 'apps/athena-provider/**'
+              - 'libs/**'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'nx.json'
+              - 'tsconfig.base.json'
+
+  verify:
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0 # full history required for `nx affected`
 
       - uses: pnpm/action-setup@v4
 
@@ -25,10 +57,64 @@ jobs:
           install: true
           cache: true
 
-      - run: pnpm install --frozen-lockfile
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-      - uses: nrwl/nx-set-shas@v4
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
 
-      - run: npx nx format:check --base=$NX_BASE --head=$NX_HEAD
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
 
-      - run: npx nx affected -t lint build test --base=$NX_BASE --head=$NX_HEAD
+      - name: Derive base/head for nx affected
+        uses: nrwl/nx-set-shas@v4
+
+      - name: Format check
+        run: pnpm exec nx format:check --base=$NX_BASE --head=$NX_HEAD
+
+      - name: Lint affected
+        run: pnpm exec nx affected --target=lint --parallel=3
+
+      - name: Type-check affected
+        run: pnpm exec nx affected --target=type-check --parallel=3
+
+      - name: Test affected
+        run: pnpm exec nx affected --target=test --parallel=3
+
+      - name: Build affected
+        run: pnpm exec nx affected --target=build --parallel=3
+
+      - name: E2E affected
+        run: pnpm exec nx affected --target=e2e --parallel=1
+
+      - name: Upload Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: apps/athena-provider/playwright-report/
+          retention-days: 14
+
+  # Required status check (the `main-protection` ruleset requires the `ci` context).
+  # This aggregate gate ALWAYS runs, so `ci` is reported on every PR — including
+  # changes that skip `verify` (docs, .github/**, anything outside the paths filter).
+  # It fails only when a job that actually ran did not succeed; a skipped `verify`
+  # counts as a pass.
+  ci:
+    needs: [changes, verify]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Gate on required jobs
+        run: |
+          echo "changes=${{ needs.changes.result }} verify=${{ needs.verify.result }}"
+          if [ "${{ needs.changes.result }}" = "failure" ] || \
+             [ "${{ needs.verify.result }}" = "failure" ] || \
+             [ "${{ needs.verify.result }}" = "cancelled" ]; then
+            echo "::error::A required CI job did not succeed"
+            exit 1
+          fi
+          echo "CI gate passed"
