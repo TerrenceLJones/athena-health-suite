@@ -97,3 +97,24 @@ jobs:
           name: playwright-report
           path: apps/athena-provider/playwright-report/
           retention-days: 14
+
+  # Required status check (the `main-protection` ruleset requires the `ci` context).
+  # This aggregate gate ALWAYS runs, so `ci` is reported on every PR — including
+  # changes that skip `verify` (docs, .github/**, anything outside the paths filter).
+  # It fails only when a job that actually ran did not succeed; a skipped `verify`
+  # counts as a pass.
+  ci:
+    needs: [changes, verify]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Gate on required jobs
+        run: |
+          echo "changes=${{ needs.changes.result }} verify=${{ needs.verify.result }}"
+          if [ "${{ needs.changes.result }}" = "failure" ] || \
+             [ "${{ needs.verify.result }}" = "failure" ] || \
+             [ "${{ needs.verify.result }}" = "cancelled" ]; then
+            echo "::error::A required CI job did not succeed"
+            exit 1
+          fi
+          echo "CI gate passed"
