@@ -37,19 +37,14 @@ export default defineConfig({
     cwd: workspaceRoot,
   },
   projects: [
+    // CI installs only chromium (.github/workflows/ci.yml runs
+    // `playwright install --with-deps chromium`). Enabling firefox, webkit, or a
+    // branded/mobile project here without also installing its browser makes e2e
+    // fail with "Executable doesn't exist" — add the matching browser to that CI
+    // step in the same change if you re-enable one.
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
-    },
-
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
-
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
     },
 
     // Uncomment for mobile browsers support
