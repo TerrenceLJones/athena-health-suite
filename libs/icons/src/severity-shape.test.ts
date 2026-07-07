@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { iconRegistry } from './icon-registry.js';
+import { iconRegistry } from './icon-registry';
 
 function outlineCommandCount(body: string): number {
   const d = body.match(/<path d="([^"]*)"/)?.[1] ?? '';

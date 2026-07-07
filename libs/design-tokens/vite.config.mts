@@ -2,14 +2,13 @@ import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
 import { fileURLToPath } from 'node:url';
 
-// Pure-data package: no React, no JSX — just the generated registry + resolver.
 export default defineConfig({
   plugins: [
     dts({
       outDir: 'dist',
       entryRoot: 'src',
       include: ['src/**/*.ts'],
-      exclude: ['src/**/*.test.ts', 'src/**/*.spec.ts', 'src/test-support/**'],
+      exclude: ['src/**/*.test.ts', 'src/**/*.spec.ts'],
     }),
   ],
   build: {

@@ -2,6 +2,15 @@
   "name": "athena-provider",
   "version": "0.0.1",
   "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "e2e": "playwright test",
+    "lint": "eslint .",
+    "type-check": "tsc --noEmit -p tsconfig.app.json"
+  },
   "nx": {
     "tags": [
       "scope:provider",

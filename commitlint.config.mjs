@@ -1,6 +1,6 @@
-// Header format used in this repo: an optional ticket prefix (e.g. "US-CW-001",
-// "CW-000", "PLATFORM-001") followed by a Conventional Commits header, e.g.:
-//   US-CW-001 feat: implement user login for clearline-web
+// Header format used in this repo: an optional ticket prefix (e.g. "US-SH-001",
+// "EPIC-SH-000", "SH-000") followed by a Conventional Commits header, e.g.:
+//   US-SH-001 feat: implement patient search for athena-provider
 //   fix: resolve pnpm version conflict in GitHub Actions workflows
 export default {
   extends: ['@commitlint/config-conventional'],

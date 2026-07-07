@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 import prettier from 'prettier';
 import { describe, expect, it } from 'vitest';
 import { buildTokensModule, buildThemeCss } from '../scripts/generate-tokens.mjs';
-import { primitive, severity, dataStatus, theme, typography, spacing, radius } from './tokens.js';
+import { primitive, severity, dataStatus, theme, typography, spacing, radius } from './tokens';
 
 const sourcePath = fileURLToPath(new URL('../tokens.source.json', import.meta.url));
 const source = JSON.parse(readFileSync(sourcePath, 'utf-8'));

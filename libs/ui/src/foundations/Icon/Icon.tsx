@@ -1,6 +1,5 @@
 import type { CSSProperties } from 'react';
-import { iconRegistry } from './icon-registry.js';
-import { resolveIconName, type AnyIconName } from './resolve-icon-name.js';
+import { iconRegistry, resolveIconName, type AnyIconName } from '@athena/icons';
 
 export interface IconProps {
   name: AnyIconName;
@@ -14,10 +13,11 @@ export interface IconProps {
 }
 
 /**
- * Renders a single named glyph from the Athena icon registry. Accepts both
+ * Web renderer for the framework-agnostic @athena/icons registry. Accepts both
  * canonical names and ALIAS table entries (e.g. `"warning"` resolves to
- * `"triangle-filled"`) so it stays interchangeable with the `<ath-icon>`
- * web component, which resolves names the same way.
+ * `"triangle-filled"`) so it stays interchangeable with the `<ath-icon>` web
+ * component, which resolves names the same way. Renders DOM `<svg>`; native
+ * (React Native) surfaces consume the same registry through their own renderer.
  */
 export function Icon({ name, size = 16, stroke, color, className }: IconProps) {
   const def = iconRegistry[resolveIconName(name)];

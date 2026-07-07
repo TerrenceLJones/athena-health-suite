@@ -1,33 +1,21 @@
-import { fileURLToPath } from 'node:url';
-import { dirname } from 'node:path';
-
 import type { StorybookConfig } from '@storybook/react-vite';
 
 const config: StorybookConfig = {
-  stories: ['../src/**/*.@(mdx|stories.@(js|jsx|ts|tsx))'],
+  stories: ['../src/**/*.mdx', '../src/**/*.stories.@(ts|tsx)'],
   addons: [
     '@storybook/addon-docs',
     '@storybook/addon-a11y',
     '@storybook/addon-themes',
     '@storybook/addon-vitest',
-    '@chromatic-com/storybook',
+    // @chromatic-com/storybook@5.2.1's CJS preset does a static `require('storybook/internal/core-server')`,
+    // which storybook@10's ESM-only export throws ERR_REQUIRE_ESM on when addon-vitest loads this config
+    // under Vitest. Skip it there; `storybook dev`/`build-storybook` still get the Chromatic panel.
+    ...(process.env.VITEST ? [] : ['@chromatic-com/storybook']),
   ],
   framework: {
-    name: getAbsolutePath('@storybook/react-vite'),
-    options: {
-      builder: {
-        viteConfigPath: 'vite.config.mts',
-      },
-    },
+    name: '@storybook/react-vite',
+    options: {},
   },
 };
 
-function getAbsolutePath(value: string): string {
-  return dirname(fileURLToPath(import.meta.resolve(`${value}/package.json`)));
-}
-
 export default config;
-
-// To customize your Vite configuration you can use the viteFinal field.
-// Check https://storybook.js.org/docs/react/builders/vite#configuration
-// and https://nx.dev/recipes/storybook/custom-builder-configs

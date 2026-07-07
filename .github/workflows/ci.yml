@@ -66,6 +66,14 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
 
+      # GitHub-hosted runners periodically ship a Microsoft apt repo whose
+      # InRelease signature fails verification (packages.microsoft.com … "no
+      # longer signed"). That breaks `apt-get update`, and therefore
+      # `playwright install --with-deps`, even though we don't need those repos
+      # to install browser system deps — so drop them first.
+      - name: Remove flaky Microsoft apt sources (runner workaround)
+        run: sudo rm -f /etc/apt/sources.list.d/*microsoft* /etc/apt/sources.list.d/*azure* || true
+
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps chromium
 

@@ -1,19 +1,15 @@
 import { defineConfig } from 'vitest/config';
 
-export default defineConfig(() => ({
-  root: __dirname,
-  cacheDir: '../../node_modules/.vite/libs/icons',
+// Pure-data package — tests read the registry/source in Node, no DOM or RTL.
+export default defineConfig({
   test: {
-    name: 'icons',
-    watch: false,
     globals: true,
-    environment: 'happy-dom',
-    setupFiles: ['../../vitest.setup.ts'],
-    include: ['{src,tests}/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
-    reporters: ['default'],
+    environment: 'node',
+    include: ['src/**/*.test.ts'],
     coverage: {
-      reportsDirectory: './test-output/vitest/coverage',
-      provider: 'v8' as const,
+      provider: 'v8',
+      reporter: ['text', 'html'],
+      reportsDirectory: 'coverage',
     },
   },
-}));
+});
