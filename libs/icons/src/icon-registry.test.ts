@@ -2,8 +2,8 @@ import { readFileSync } from 'node:fs';
 import prettier from 'prettier';
 import { describe, expect, it } from 'vitest';
 import { loadAthenaIconsApi, buildIconRegistryModule } from '../scripts/generate-icons.mjs';
-import { iconRegistry, iconAliases } from './icon-registry.js';
-import { resolveTestAsset } from './test-support/resolve-test-asset.js';
+import { iconRegistry, iconAliases } from './icon-registry';
+import { resolveTestAsset } from './test-support/resolve-test-asset';
 
 const canonicalScriptPath = resolveTestAsset(
   '../../../specs/designs/athena-icons.js',

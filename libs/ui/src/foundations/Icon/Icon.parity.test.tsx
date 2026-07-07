@@ -1,15 +1,38 @@
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
+import vm from 'node:vm';
 import { describe, expect, it } from 'vitest';
 import { render } from '@testing-library/react';
-import { loadAthenaIconsApi } from '../scripts/generate-icons.mjs';
-import { Icon } from './Icon.js';
-import { iconRegistry } from './icon-registry.js';
-import { resolveTestAsset } from './test-support/resolve-test-asset.js';
+import { iconRegistry } from '@athena/icons';
+import { Icon } from './Icon';
 
-const canonicalScriptPath = resolveTestAsset(
-  '../../../specs/designs/athena-icons.js',
-  import.meta.url,
-);
-const api = loadAthenaIconsApi(canonicalScriptPath);
+// Load the canonical <ath-icon> web component from the design source and read
+// off its svg() output, to prove this React <Icon> renders identical markup.
+// athena-icons.js touches HTMLElement at load, so evaluate it in a vm sandbox
+// with a minimal DOM shim.
+function loadAthenaIconsApi() {
+  const scriptPath = path.join(
+    path.dirname(fileURLToPath(import.meta.url)),
+    '../../../../../specs/designs/athena-icons.js',
+  );
+  const source = readFileSync(scriptPath, 'utf-8');
+  const sandboxModule = {
+    exports: {} as { svg: (name: string, size: number, stroke: number) => string },
+  };
+  const sandbox = {
+    module: sandboxModule,
+    exports: sandboxModule.exports,
+    HTMLElement: class {},
+    customElements: { get: () => undefined, define: () => undefined },
+    window: undefined,
+  };
+  vm.createContext(sandbox);
+  vm.runInContext(source, sandbox, { filename: scriptPath });
+  return sandboxModule.exports;
+}
+
+const api = loadAthenaIconsApi();
 
 describe('Icon vs <ath-icon> parity (AC-01)', () => {
   it.each(Object.keys(iconRegistry))(

@@ -1,17 +1,17 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import path from 'node:path';
 import prettier from 'prettier';
 import { describe, expect, it } from 'vitest';
-import { buildThemeCss, buildThemeModule, toThemeVars } from '../../scripts/generate-theme.mjs';
-import { themeColors, themeVars, cssVar } from './theme.js';
+import { buildThemeCss, buildThemeModule, toThemeVars } from '../scripts/generate-theme.mjs';
+import { themeColors, themeVars, cssVar } from './theme';
 
-const manifestPath = fileURLToPath(
-  new URL('../../../../specs/designs/athena-tokens.json', import.meta.url),
-);
+const here = path.dirname(fileURLToPath(import.meta.url));
+const manifestPath = path.join(here, '../../../specs/designs/athena-tokens.json');
 const manifest = JSON.parse(readFileSync(manifestPath, 'utf-8'));
 
-const tsPath = fileURLToPath(new URL('./theme.ts', import.meta.url));
-const cssPath = fileURLToPath(new URL('./theme.css', import.meta.url));
+const tsPath = path.join(here, 'theme.ts');
+const cssPath = path.join(here, 'applied-theme.css');
 const css = readFileSync(cssPath, 'utf-8');
 const normalizedCss = css.replace(/\s+/g, '');
 
@@ -31,7 +31,7 @@ const HEADLINE_VARS = [
   'disc',
 ];
 
-describe('generated theme.css / theme.ts are not stale', () => {
+describe('generated theme.ts / applied-theme.css are not stale', () => {
   it('theme.ts matches what generate-theme.mjs would produce from the manifest', async () => {
     const config = (await prettier.resolveConfig(tsPath)) ?? {};
     const expected = await prettier.format(buildThemeModule(manifest), {
@@ -41,7 +41,7 @@ describe('generated theme.css / theme.ts are not stale', () => {
     expect(readFileSync(tsPath, 'utf-8')).toBe(expected);
   });
 
-  it('theme.css matches what generate-theme.mjs would produce from the manifest', async () => {
+  it('applied-theme.css matches what generate-theme.mjs would produce from the manifest', async () => {
     const config = (await prettier.resolveConfig(cssPath)) ?? {};
     const expected = await prettier.format(buildThemeCss(manifest), {
       ...config,
@@ -51,7 +51,7 @@ describe('generated theme.css / theme.ts are not stale', () => {
   });
 });
 
-describe('theme.css', () => {
+describe('applied-theme.css', () => {
   it('scopes light and dark under their own [data-theme] selectors', () => {
     expect(css).toContain(":root[data-theme='light']");
     expect(css).toContain(":root[data-theme='dark']");

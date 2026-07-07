@@ -1,4 +1,4 @@
-import { iconAliases, type IconName, type AliasName } from './icon-registry.js';
+import { iconAliases, type IconName, type AliasName } from './icon-registry';
 
 export type AnyIconName = IconName | AliasName;
 

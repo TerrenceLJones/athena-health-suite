@@ -1,6 +1,6 @@
 // GENERATED FILE — do not edit by hand.
 // Source: specs/designs/athena-tokens.json (theme tier), renamed to the mockup's
-// bare CSS variable names. Regenerate with: pnpm --filter @athena/ui generate
+// bare CSS variable names. Regenerate with: pnpm --filter @athena/design-tokens generate
 
 export type ThemeName = 'light' | 'dark';
 

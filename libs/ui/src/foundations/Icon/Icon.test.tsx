@@ -1,8 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { render } from '@testing-library/react';
-import { Icon } from './Icon.js';
-import { resolveIconName, type AnyIconName } from './resolve-icon-name.js';
-import { iconRegistry } from './icon-registry.js';
+import { resolveIconName, iconRegistry, type AnyIconName } from '@athena/icons';
+import { Icon } from './Icon';
 
 describe('Icon', () => {
   it('renders the named icon with its registry viewBox and default stroke-width', () => {

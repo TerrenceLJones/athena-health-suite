@@ -1,0 +1,52 @@
+import { Meta, Stories } from '@storybook/addon-docs/blocks';
+import * as IconStories from './Icon.stories';
+
+<Meta of={IconStories} />
+
+# Icon
+
+The web renderer for the framework-agnostic `@athena/icons` registry. Every glyph is drawn on a
+shared 16×16 grid with one default stroke width (1.6) and `stroke="currentColor"`, so icons
+re-color with their container's text and never drift in weight. `name` accepts both canonical
+registry keys and `ALIAS` entries (e.g. `warning` → `triangle-filled`), resolved through the same
+table as the `<ath-icon>` web component. The registry is pure data; native surfaces render it
+through their own `react-native-svg` component off the same source.
+
+## User story
+
+**US-SH-005 — Icon Registry Component**
+
+As a frontend engineer on either Athena Provider or Athena Field, I want to reference any status,
+navigation, or clinical icon by a stable name — rather than importing raw SVG paths — drawn from
+one registry (`athena-icons.js`) with one shared stroke width and `currentColor` theming. Resolving
+every reference through one named registry means a stroke-width change or a new glyph is a
+single-file edit, and `html.to.design` imports land as labelled, stable Figma components instead of
+anonymous path data.
+
+## Acceptance criteria
+
+- **AC-01 — Every registered icon resolves by name in both rendering surfaces.** Given an icon name
+  in `athena-icons.js`'s `ICONS` map, when referenced via the `<ath-icon>` web component or this
+  React `<Icon>`, both render identical markup.
+- **AC-02 — All icons share one stroke width and inherit `currentColor`.** When a container's text
+  color or theme changes, the icon re-colors with it, using the shared default stroke width (1.6)
+  with no component-local override.
+- **AC-03 — Severity icons are distinguishable with hue removed.** `sev-critical`, `sev-advisory`,
+  and `sev-info` stay distinct by shape — octagon, triangle, outlined circle — satisfying the
+  never-color-alone invariant.
+- **AC-04 — Alternate names resolve to their canonical icon.** A name present only in the `ALIAS`
+  table (e.g. `warning`, `critical`, `retry`) resolves to the same rendered glyph as its canonical
+  name (`triangle-filled`, `circle-filled`, `refresh`).
+- AC-05 — Icon names import into Figma as labelled components via `html.to.design` (Figma-side,
+  no automated test).
+
+### Where each is verified
+
+- **AC-01** → `Icon.parity.test.tsx` (this folder) renders every registry glyph and diffs it against
+  the source `svg()` output.
+- **AC-02 / AC-04** → `Icon.test.tsx` (this folder) asserts the rendered `stroke-width`,
+  `currentColor`, and alias resolution.
+- **AC-03** → `@athena/icons`' `severity-shape.test.ts`; the `ALIAS` table itself is proven in
+  `@athena/icons`' `icon-aliases.test.ts`.
+
+<Stories />

@@ -1,17 +1,16 @@
 #!/usr/bin/env node
-// Regenerates src/theme/theme.css and src/theme/theme.ts from the design-token
+// Regenerates src/theme.ts and src/applied-theme.css from the design-token
 // manifest at specs/designs/athena-tokens.json — the single source of truth.
 //
-// design-tokens (@athena/design-tokens) mirrors that same manifest as the raw,
-// tier-named token tree (primitive / severity / theme.text-muted / ...). This
-// layer is the *applied* theme @athena/ui components author against: it renames
+// This is the *applied* theme @athena/ui components author against: it renames
 // the manifest's `theme` keys to the mockup's bare CSS variable names
 // (--bg / --card / --text-1..3 / --accent / --crit / --adv / --info / --stale /
-// --live / --disc / ...) and emits them under [data-theme="light"|"dark"].
+// --live / --disc / ...) and emits them under [data-theme="light"|"dark"]. It
+// sits alongside src/theme.css (the raw --ath-* / @theme primitive tier).
 //
-// Edit the manifest, then re-run: pnpm --filter @athena/ui generate
+// Edit the manifest, then re-run: pnpm --filter @athena/design-tokens generate
 
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import prettier from 'prettier';
@@ -27,13 +26,13 @@ const RENAME = {
 
 const GENERATED_HEADER_TS = `// GENERATED FILE — do not edit by hand.
 // Source: specs/designs/athena-tokens.json (theme tier), renamed to the mockup's
-// bare CSS variable names. Regenerate with: pnpm --filter @athena/ui generate
+// bare CSS variable names. Regenerate with: pnpm --filter @athena/design-tokens generate
 `;
 
 const GENERATED_HEADER_CSS = `/*
  * GENERATED FILE — do not edit by hand.
  * Source: specs/designs/athena-tokens.json (theme tier), renamed to the mockup's
- * bare CSS variable names. Regenerate with: pnpm --filter @athena/ui generate
+ * bare CSS variable names. Regenerate with: pnpm --filter @athena/design-tokens generate
  */
 `;
 
@@ -102,14 +101,11 @@ async function main() {
   const manifestPath = path.join(root, '../../specs/designs/athena-tokens.json');
   const tokens = JSON.parse(readFileSync(manifestPath, 'utf8'));
 
-  const themeDir = path.join(root, 'src/theme');
-  mkdirSync(themeDir, { recursive: true });
-
-  await writeFormatted(path.join(themeDir, 'theme.ts'), buildThemeModule(tokens));
-  await writeFormatted(path.join(themeDir, 'theme.css'), buildThemeCss(tokens));
+  await writeFormatted(path.join(root, 'src/theme.ts'), buildThemeModule(tokens));
+  await writeFormatted(path.join(root, 'src/applied-theme.css'), buildThemeCss(tokens));
 
   // eslint-disable-next-line no-console
-  console.log('Generated src/theme/theme.ts and src/theme/theme.css from athena-tokens.json');
+  console.log('Generated src/theme.ts and src/applied-theme.css from athena-tokens.json');
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

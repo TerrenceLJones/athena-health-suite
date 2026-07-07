@@ -1,0 +1,5 @@
+/* Applied theme layer from @athena/design-tokens: ships the light/dark CSS
+ * custom properties (var(--bg), var(--text-1), …) with @athena/ui so consumers
+ * get the theme by importing the package. Toggle via [data-theme] on a root. */
+@import '@athena/design-tokens/src/theme.css';
+@import '@athena/design-tokens/src/applied-theme.css';

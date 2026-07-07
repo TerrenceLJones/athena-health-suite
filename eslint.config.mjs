@@ -36,7 +36,6 @@ export default tseslint.config(
             'libs/ui/.storybook/*.ts',
             'libs/ui/.storybook/*.tsx',
             'vitest.setup.ts',
-            'vitest.workspace.ts',
           ],
         },
         tsconfigRootDir: import.meta.dirname,

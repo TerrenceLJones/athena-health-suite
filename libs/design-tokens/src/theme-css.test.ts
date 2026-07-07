@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { theme } from './tokens.js';
+import { theme } from './tokens';
 
 const cssPath = fileURLToPath(new URL('./theme.css', import.meta.url));
 const css = readFileSync(cssPath, 'utf-8');

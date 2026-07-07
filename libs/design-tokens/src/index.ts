@@ -1,4 +1,5 @@
 import './theme.css';
+import './applied-theme.css';
 
 export {
   primitive,
@@ -10,4 +11,8 @@ export {
   radius,
   type Severity,
   type DataStatus,
-} from './tokens.js';
+} from './tokens';
+
+// Applied theme layer (mockup-named light/dark CSS vars) — components author
+// against these bare var(--bg)/var(--text-1) names; toggle via [data-theme].
+export { themeColors, themeVars, cssVar, type ThemeName, type ThemeVar } from './theme';

@@ -4,11 +4,18 @@
   "license": "MIT",
   "packageManager": "pnpm@9.15.1",
   "scripts": {
+    "dev": "nx run-many --target=dev --all",
+    "build": "nx run-many --target=build --all",
+    "test": "nx run-many --target=test --all",
+    "lint": "nx run-many --target=lint --all",
+    "type-check": "nx run-many --target=type-check --all",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,css}\" --ignore-path .gitignore",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,css}\" --ignore-path .gitignore",
+    "graph": "nx graph",
     "prepare": "husky"
   },
   "private": true,
   "devDependencies": {
-    "@chromatic-com/storybook": "^5.2.1",
     "@commitlint/cli": "^21.2.0",
     "@commitlint/config-conventional": "^21.2.0",
     "@eslint/js": "^10.0.1",
@@ -46,7 +53,6 @@
     "@vitest/browser-playwright": "^4.1.9",
     "@vitest/coverage-v8": "~4.1.0",
     "@vitest/ui": "~4.1.0",
-    "chromatic": "^18.0.1",
     "eslint": "^10.6.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
