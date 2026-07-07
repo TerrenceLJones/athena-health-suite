@@ -2,8 +2,8 @@ epic_id: EPIC-SH-000
 title: 'Design Tokens & Icon Registry Foundation'
 app: shared
 feature_area: 'design-system'
-status: DRAFT
-approved_date: null
+status: IMPLEMENTED
+approved_date: '2026-07-07'
 created_date: '2026-07-06'
 
 source_reference:
@@ -67,11 +67,15 @@ notes: |
   left empty rather than pointing at a section that isn't actually an ADR.
 
   Both apps depend on this epic's output — Athena Provider for its chart surfaces,
-  Athena Field for its own status/severity indicators — but neither app-specific
-  epic lists EPIC-SH-000 in depends_on_epics or reuses_from yet, since none of those
-  epics existed, or were even planned, when this one was cut from phase-1 source
-  rather than the phase-2 Gherkin doc. US-SH-006, this epic's last story, is expected
-  to close that gap once it ships: retroactively adding EPIC-SH-000 to every existing
-  epic's reuses_from and recording the addition as a changes.updates entry on each —
-  the same living-document pattern EPIC-AP-002 used when it named US-AP-010/011 as
-  stories it expected to gain before either existed.
+  Athena Field for its own status/severity indicators. When this epic was first cut
+  from phase-1 source rather than the phase-2 Gherkin doc, none of the app-specific
+  epics that consume it existed or were even planned, so none listed EPIC-SH-000 in
+  reuses_from. US-SH-006, this epic's last story, closed that gap: it retroactively
+  added EPIC-SH-000 to the reuses_from of every Gherkin-derived epic (EPIC-AP-001–004,
+  EPIC-AF-001–002, EPIC-SH-001) and recorded the addition as a changes.updates entry
+  on each — the same living-document pattern EPIC-AP-002 used when it named
+  US-AP-010/011 as stories it expected to gain before either existed. It also
+  published docs/severity-system.md, the developer-facing severity-tier reference
+  (CSS variable + <Icon> name + shape + label), whose token/icon pairing is enforced
+  in CI by libs/icons/src/severity-tokens.test.ts. With US-SH-004–006 all delivered,
+  this epic is IMPLEMENTED.
