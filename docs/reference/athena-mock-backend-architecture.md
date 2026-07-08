@@ -59,6 +59,16 @@ export const medplum = new MedplumClient({
 })
 ```
 
+> **Implementation note — `baseUrl` vs `fhirUrlPath`.** `VITE_FHIR_BASE_URL` is the
+> *full* FHIR R4 endpoint (`https://api.medplum.com/fhir/R4`), but `MedplumClient`
+> composes its request URL as `baseUrl + fhirUrlPath` where `fhirUrlPath` defaults
+> to `fhir/R4/`. Passing the full endpoint as `baseUrl` verbatim (as the snippet
+> above does) doubles the prefix to `/fhir/R4/fhir/R4/`. The real client in
+> `libs/fhir/client` splits the env value into its origin (`baseUrl`) and path
+> (`fhirUrlPath`) so requests resolve correctly. For access-token-in-memory-only,
+> it also passes `storage: new ClientStorage(new MemoryStorage())` explicitly —
+> the browser default is localStorage-backed, not in-memory.
+
 What the real Medplum server provides without any mocking:
 - FHIR R4 CRUD for Patient, Observation, Encounter, MedicationRequest, Condition, DocumentReference, AuditEvent, Questionnaire, QuestionnaireResponse, Subscription
 - SMART on FHIR EHR launch and standalone launch (via `launch.smarthealthit.org`)

@@ -209,6 +209,42 @@ importers:
 
   libs/design-tokens: {}
 
+  libs/fhir/client:
+    dependencies:
+      '@athena/fhir-types':
+        specifier: workspace:*
+        version: link:../types
+      '@medplum/core':
+        specifier: 5.1.24
+        version: 5.1.24
+
+  libs/fhir/hooks:
+    dependencies:
+      '@athena/fhir-client':
+        specifier: workspace:*
+        version: link:../client
+      '@athena/fhir-types':
+        specifier: workspace:*
+        version: link:../types
+      '@medplum/core':
+        specifier: 5.1.24
+        version: 5.1.24
+      '@medplum/react-hooks':
+        specifier: 5.1.24
+        version: 5.1.24(@medplum/core@5.1.24)(react@19.2.7)
+      '@tanstack/react-query':
+        specifier: ^5.0.0
+        version: 5.101.2(react@19.2.7)
+      react:
+        specifier: ^19.0.0
+        version: 19.2.7
+
+  libs/fhir/types:
+    dependencies:
+      '@medplum/fhirtypes':
+        specifier: 5.1.24
+        version: 5.1.24
+
   libs/icons: {}
 
   libs/ui:
@@ -1329,6 +1365,26 @@ packages:
     peerDependencies:
       '@types/react': '>=16'
       react: '>=16'
+
+  '@medplum/core@5.1.24':
+    resolution: {integrity: sha512-OhF9DXwg1C5yyK0fJbSmjxupzfrAoh/gwwpJfZcwxHwGZoDNfPFY/ZI4KxAmII5acPsr6VxUB+SCHWp0c3Mnfw==}
+    engines: {node: ^22.18.0 || >=24.2.0}
+    peerDependencies:
+      pdfmake: ^0.2.5
+    peerDependenciesMeta:
+      pdfmake:
+        optional: true
+
+  '@medplum/fhirtypes@5.1.24':
+    resolution: {integrity: sha512-22TsFeSJOzchtAZdqfKBV12hvgari477BnHI6Lx9ZrX3kgnCjH79MKrfS5B8SchEKDQ8iVjow1Px9RZihKX5AQ==}
+    engines: {node: ^22.18.0 || >=24.2.0}
+
+  '@medplum/react-hooks@5.1.24':
+    resolution: {integrity: sha512-1E+8FAMYi0NNXjZA6utvoBC84Zq516WjuL94mr1eokgJb48D0fRjtD+Ot9qFlU2ioj+d+P4j8i838ePwg5Xe9w==}
+    engines: {node: ^22.18.0 || >=24.2.0}
+    peerDependencies:
+      '@medplum/core': 5.1.24
+      react: ^18.0.0 || ^19.0.0
 
   '@module-federation/error-codes@0.21.6':
     resolution: {integrity: sha512-MLJUCQ05KnoVl8xd6xs9a5g2/8U+eWmVxg7xiBMeR0+7OjdWUbHwcwgVFatRIwSZvFgKHfWEiI7wsU1q1XbTRQ==}
@@ -7915,6 +7971,15 @@ snapshots:
     dependencies:
       '@types/mdx': 2.0.14
       '@types/react': 19.2.17
+      react: 19.2.7
+
+  '@medplum/core@5.1.24': {}
+
+  '@medplum/fhirtypes@5.1.24': {}
+
+  '@medplum/react-hooks@5.1.24(@medplum/core@5.1.24)(react@19.2.7)':
+    dependencies:
+      '@medplum/core': 5.1.24
       react: 19.2.7
 
   '@module-federation/error-codes@0.21.6': {}

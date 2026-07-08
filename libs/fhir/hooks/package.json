@@ -1,0 +1,26 @@
+{
+  "name": "@athena/fhir-hooks",
+  "version": "0.0.1",
+  "private": true,
+  "description": "React hooks for reading FHIR R4 resources — TanStack Query + @medplum/react-hooks. useVitalSigns / usePatientChart (Spike S1).",
+  "main": "src/index.ts",
+  "scripts": {
+    "lint": "eslint .",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "build": "vite build"
+  },
+  "peerDependencies": {
+    "@tanstack/react-query": "^5.0.0",
+    "react": "^19.0.0"
+  },
+  "dependencies": {
+    "@athena/fhir-client": "workspace:*",
+    "@athena/fhir-types": "workspace:*",
+    "@medplum/core": "5.1.24",
+    "@medplum/react-hooks": "5.1.24"
+  },
+  "metadata": {
+    "package_type": "shared"
+  }
+}
