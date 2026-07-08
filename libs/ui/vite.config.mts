@@ -16,6 +16,7 @@ export default defineConfig({
         'react',
         'react/jsx-runtime',
         'react-dom',
+        'radix-ui',
         '@athena/icons',
         '@athena/design-tokens',
       ],

@@ -27,6 +27,10 @@ export default defineConfig({
       },
       {
         plugins: [react(), storybookTest({ configDir: '.storybook' })],
+        // radix-ui (Checkbox's backing primitive) is only reachable through story
+        // modules, so Vite's scanner misses it and would optimize+reload mid-run,
+        // flaking the Checkbox stories. Pre-bundle it so the page never reloads mid-run.
+        optimizeDeps: { include: ['radix-ui'] },
         test: {
           name: 'storybook',
           browser: {

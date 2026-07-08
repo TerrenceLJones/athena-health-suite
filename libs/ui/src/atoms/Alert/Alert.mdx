@@ -1,0 +1,44 @@
+import { Meta, Stories } from '@storybook/addon-docs/blocks';
+import * as AlertStories from './Alert.stories';
+
+<Meta of={AlertStories} />
+
+# Alert
+
+An inline banner with six tones (`info`, `positive`, `warning`, `negative`, `critical`,
+`neutral`), each pairing an icon with its color so meaning isn't carried by color alone.
+
+## User story
+
+**US-AP-012 — Provider UI atom library**
+
+As an Athena Provider engineer building any feature epic, I want the 11 Clearline-sourced UI
+atoms (Button, TextField, PasswordField, Text, Container, Checkbox, Alert, Chip, Avatar,
+ProgressBar, SegmentedControl) ported wholesale and re-themed to Athena's own tokens and icons,
+so that I never hand-roll a button, field, or badge and risk missing an accessibility rule the
+design system already solved. Alert has no acceptance criterion of its own in this story; it is
+governed by the tier's shared constraints below.
+
+## Acceptance criteria (shared across this tier)
+
+- AC-01 — Button. Given Button with `loading={true}`, when it renders, then the button is
+  disabled, shows a spinning icon, and does not fire `onClick`.
+- AC-02 — TextField. Given TextField with `state="error"` and an `error` message, when it
+  renders, then the input has `aria-invalid="true"` and `aria-describedby` pointing at a
+  `role="alert"` element containing the error text.
+- AC-03 — Checkbox. Given Checkbox (wrapping Radix `Checkbox`), when a user clicks it or
+  activates it via keyboard (Space), then `onCheckedChange` fires and `aria-checked` reflects
+  checked/indeterminate/unchecked correctly.
+- AC-04 — PasswordField. Given PasswordField's visibility toggle, when activated, then the
+  input's `type` switches between `password` and `text` without losing focus or cursor position.
+- AC-05 — SegmentedControl. Given SegmentedControl, when used controlled (`value`/`onChange`) or
+  uncontrolled (internal state), then it tracks and reports the active option correctly in both
+  modes.
+- AC-06 — Text. Given `Text` with a given `size`, when it renders, then font size, weight
+  default, letter-spacing, and font family all come from the token pipeline's `typography.scale`
+  for that step, independent of its `as` prop (e.g. `size="body"` `as="h3"`).
+
+Per this story's technical notes, every atom (Alert included) is styled with Tailwind utility
+classes bound to the `--*` tokens — no inline style objects, no CSS Modules.
+
+<Stories />
