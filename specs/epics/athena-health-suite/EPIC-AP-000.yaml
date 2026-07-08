@@ -1,0 +1,73 @@
+epic_id: EPIC-AP-000
+title: 'Provider Design System Foundation'
+app: athena-provider
+feature_area: 'design-system'
+status: DRAFT
+approved_date: null
+created_date: '2026-07-07'
+
+source_reference:
+  - 'Clearline design system, libs/ui/src/atoms/ (EPIC-CW-000 / US-CW-023) — an already-shipped, validated component set ported wholesale, not redesigned'
+
+package_location:
+  - libs/ui/
+
+deployment_unit: 'apps/athena-provider (Vercel)'
+
+adr_reference: []
+
+# Consumes EPIC-SH-000's token pipeline (US-SH-004) and Icon component (US-SH-005) directly.
+depends_on_epics:
+  - EPIC-SH-000
+
+extends_stories: []
+
+reuses_from:
+  - EPIC-SH-000
+
+has_ui: true
+
+changes:
+  adds:
+    - story_id: US-AP-012
+      story_path: specs/user-stories/athena-health-suite/US-AP-012.yaml
+      title: 'Provider UI atom library'
+  updates: []
+  deprecates: []
+  removes: []
+
+notes: |
+  This epic is a wholesale port of Clearline's own EPIC-CW-000 / US-CW-023 — the
+  same component set, the same accessibility patterns, re-themed only. The 11 atoms
+  (Button, TextField, PasswordField, Text, Container, Checkbox, Alert, Chip, Avatar,
+  ProgressBar, SegmentedControl) are copied from Clearline's libs/ui/src/atoms/,
+  each already shipped, tested, and Storybook-documented, and are NOT redesigned:
+  props, behavior, and ARIA wiring are preserved verbatim. The only substantive
+  changes are two swaps — every cl-* Tailwind token class is re-pointed at Athena's
+  own CSS custom properties (the theme layer US-SH-004 emits), and every Clearline
+  Icon/IconName reference is swapped for Athena's own <Icon> component (US-SH-005)
+  and icon-name type. Nothing about a button's states or a form field's error wiring
+  is re-litigated, because the source is an already-validated library rather than a
+  new design.
+
+  EPIC-AP-000 plays the same "foundational, precedes the numbered feature epics"
+  role for athena-provider that EPIC-SH-000 plays across both apps. Where EPIC-SH-000
+  ships the shared substrate — typed tokens, compiled CSS custom properties, the icon
+  registry — that both apps render against, EPIC-AP-000 ships the Provider-specific
+  React atom layer that every numbered Provider feature epic (EPIC-AP-001 identity &
+  access, EPIC-AP-002 chart core, and onward) composes instead of hand-rolling its own
+  buttons, fields, and badges. Its 000 number is deliberate: like EPIC-SH-000, it is
+  not a Gherkin-derived feature epic but the design-system foundation the feature epics
+  are built on top of.
+
+  depends_on_epics is EPIC-SH-000 rather than empty because this atom layer is a direct
+  consumer, not merely a stylistic sibling: Text reads US-SH-004's typography.scale from
+  @athena/design-tokens, every atom's colors resolve through US-SH-004's --* theme
+  variables, and Button/Checkbox/Chip/Alert/PasswordField render US-SH-005's <Icon>
+  component and IconName type. If EPIC-SH-000's token pipeline or icon registry changes
+  shape, this epic's atoms change with it.
+
+  No numbered ADR governs this epic. The plan's §5 Shared Design System (@athena/ui)
+  section documents the design-system commitment but is not itself an ADR with
+  alternatives considered, so adr_reference is left empty rather than pointing at a
+  section that isn't one — the same rationale EPIC-SH-000 records.

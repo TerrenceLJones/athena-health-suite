@@ -1,5 +1,64 @@
+@import 'tailwindcss';
+
 /* Applied theme layer from @athena/design-tokens: ships the light/dark CSS
  * custom properties (var(--bg), var(--text-1), …) with @athena/ui so consumers
  * get the theme by importing the package. Toggle via [data-theme] on a root. */
 @import '@athena/design-tokens/src/theme.css';
 @import '@athena/design-tokens/src/applied-theme.css';
+
+/* Explicit @source: Tailwind's automatic content detection is anchored to the
+ * consuming app's Vite root, so without this, classNames inside this library's
+ * own components (foundations/atoms/molecules/organisms) are invisible to any
+ * Tailwind build running from outside libs/ui — e.g. apps/athena-provider. */
+@source './';
+
+/* Bind Tailwind color/font utilities to @athena/design-tokens' applied-theme
+ * variables — reusing Athena's own token names directly (bg-accent, text-text-1,
+ * border-border-strong, …) rather than inventing a new prefix. `@theme inline`
+ * emits utilities that reference the runtime var(), so [data-theme] light/dark
+ * switching flows through the same classes. This is the Athena-side equivalent of
+ * Clearline's --cl-* @theme binding that the ported atoms were originally styled
+ * against. */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-card: var(--card);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-text-1: var(--text-1);
+  --color-text-2: var(--text-2);
+  --color-text-3: var(--text-3);
+  --color-inverse: var(--inverse);
+  --color-accent: var(--accent);
+  --color-accent-2: var(--accent-2);
+  --color-accent-soft: var(--accent-soft);
+  --color-crit: var(--crit);
+  --color-crit-fg: var(--crit-fg);
+  --color-crit-tint: var(--crit-tint);
+  --color-crit-line: var(--crit-line);
+  --color-adv: var(--adv);
+  --color-adv-fg: var(--adv-fg);
+  --color-adv-tint: var(--adv-tint);
+  --color-adv-line: var(--adv-line);
+  --color-info: var(--info);
+  --color-info-fg: var(--info-fg);
+  --color-info-tint: var(--info-tint);
+  --color-info-line: var(--info-line);
+  --color-stale: var(--stale);
+  --color-stale-fg: var(--stale-fg);
+  --color-stale-tint: var(--stale-tint);
+  --color-stale-line: var(--stale-line);
+  --color-live: var(--live);
+  --color-live-fg: var(--live-fg);
+  --color-live-tint: var(--live-tint);
+  --color-live-line: var(--live-line);
+  --color-disc: var(--disc);
+  --color-err: var(--err);
+  --color-err-fg: var(--err-fg);
+  --color-err-tint: var(--err-tint);
+
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+}

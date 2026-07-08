@@ -1,0 +1,83 @@
+# User Story Registry Record
+# User stories are the source of truth for what the application supports.
+# Epics declare changes to these records via their changes.adds/updates/deprecates/removes sections.
+
+# Identity
+id: 'US-AP-012'
+app: 'athena-provider'
+feature_area: 'design-system'
+title: 'Provider UI atom library'
+
+# Lifecycle status
+status: 'DRAFT'
+dependencies:
+  - US-SH-004
+  - US-SH-005
+
+# Provenance — immutable after creation
+created_by_epic: 'EPIC-AP-000'
+created_date: '2026-07-07'
+
+# Provenance history — append-only record of every epic that has touched this story
+history: []
+
+# User Story
+user_story:
+  persona: 'an Athena Provider engineer building any feature epic'
+  capability: "the 11 Clearline-sourced UI atoms (Button, TextField, PasswordField, Text, Container, Checkbox, Alert, Chip, Avatar, ProgressBar, SegmentedControl), ported wholesale and re-themed to Athena's own tokens and icons"
+  business_value: "the smallest, most-repeated visual elements are built once, correctly, instead of being hand-rolled slightly differently inside each feature epic — and since they're a port of an already-shipped, already-accessibility-tested library rather than a new design, there's no re-litigating button states or form-field ARIA wiring from scratch"
+
+# Acceptance Criteria — adapted from US-CW-023's own real acceptance criteria.
+acceptance_criteria:
+  - id: 'AC-01'
+    description: |
+      Given Button with `loading={true}`
+      When it renders
+      Then the button is disabled (blocks activation), shows a spinning icon, and does not fire `onClick`
+    status: 'active'
+  - id: 'AC-02'
+    description: |
+      Given TextField with `state="error"` and an `error` message
+      When it renders
+      Then the input has `aria-invalid="true"` and `aria-describedby` pointing at a `role="alert"`
+      element containing the error text
+    status: 'active'
+  - id: 'AC-03'
+    description: |
+      Given Checkbox, which wraps Radix `Checkbox` rather than a hand-rolled control
+      When a user clicks it or activates it via keyboard (Space)
+      Then `onCheckedChange` fires and `aria-checked` reflects checked/indeterminate/unchecked correctly
+    status: 'active'
+  - id: 'AC-04'
+    description: |
+      Given PasswordField's visibility toggle
+      When it is activated
+      Then the underlying input's `type` switches between `password` and `text` without losing
+      focus or cursor position
+    status: 'active'
+  - id: 'AC-05'
+    description: |
+      Given SegmentedControl
+      When it is used either controlled (`value`/`onChange`) or uncontrolled (internal state)
+      Then it tracks and reports the active option correctly in both modes
+    status: 'active'
+  - id: 'AC-06'
+    description: |
+      Given `Text` with a given `size`
+      When it renders
+      Then font size, weight default, letter-spacing, and font family all come from the token
+      pipeline's `typography.scale` for that step, independent of its `as` prop — e.g. a
+      document-outline `h3` visually sized as `body` (`size="body"` `as="h3"`)
+    status: 'active'
+
+# Technical Notes
+# Placeholder — populated by the Feature-Slice Loop when this story's own branch closes.
+technical_notes: null
+
+# Edge Cases
+# Placeholder — populated by the Feature-Slice Loop when this story's own branch closes.
+edge_cases: null
+
+# Implementation Status
+# Placeholder — populated by the Feature-Slice Loop when this story's own branch closes.
+implementation_status: null
