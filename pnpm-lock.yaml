@@ -207,6 +207,12 @@ importers:
 
   apps/athena-provider: {}
 
+  libs/compliance:
+    dependencies:
+      '@athena/fhir-types':
+        specifier: workspace:*
+        version: link:../fhir/types
+
   libs/design-tokens: {}
 
   libs/fhir/client:
