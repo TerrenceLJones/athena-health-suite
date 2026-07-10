@@ -1,0 +1,19 @@
+{
+  "name": "@athena/fhir-types",
+  "version": "0.0.1",
+  "private": true,
+  "description": "FHIR R4 TypeScript types for the Athena Health Suite. Re-exports @medplum/fhirtypes with zero any — the single source of truth for clinical resource shapes (ADR-001).",
+  "main": "src/index.ts",
+  "scripts": {
+    "lint": "eslint .",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@medplum/fhirtypes": "5.1.24"
+  },
+  "metadata": {
+    "package_type": "shared"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "@athena/fhir-client",
+  "version": "0.0.1",
+  "private": true,
+  "description": "MedplumClient singleton for the Athena Health Suite — a real FHIR R4 client (Layer 1). Access token is held in memory only; PHI never touches localStorage.",
+  "main": "src/index.ts",
+  "scripts": {
+    "lint": "eslint .",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@athena/fhir-types": "workspace:*",
+    "@medplum/core": "5.1.24"
+  },
+  "metadata": {
+    "package_type": "shared"
+  }
+}
