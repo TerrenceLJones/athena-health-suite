@@ -1,0 +1,19 @@
+{
+  "name": "@athena/compliance",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Cross-cutting HIPAA compliance primitives (EPIC-SH-001). PHI-safe telemetry (logEvent) enforced by the branded PHI<T> types from @athena/fhir-types at compile time.",
+  "main": "src/index.ts",
+  "scripts": {
+    "lint": "eslint .",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@athena/fhir-types": "workspace:*"
+  },
+  "metadata": {
+    "package_type": "shared"
+  }
+}
